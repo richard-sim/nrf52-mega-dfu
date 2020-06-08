@@ -24,6 +24,11 @@ Presents itself as a BLE UART service with various commands useful for understan
 
 ## megadfu
 Packages the Proxxi CT firmware, bootloader, and appropriate SoftDevice (the payloads), and installs and configures them when run.
+Requres the following files to be copied to megadfu/ from Proxxi CT's firmware build output directory:
+* bootloader/bootloader.hex
+* bootloader_setting.hex
+* firmware.hex
+* dfu-package-app-all.DONOTUSETHISFILE.zip/sd_bl.bin
 
 ## megadfu-bootstrap
 Firmware used to jump from the SDK11/SDv200 application start address to megadfu that is located at the SDK15.3/SDv611 application start address, as the SDK11 application start address will be overwritten when the new SoftDevice is installed.
