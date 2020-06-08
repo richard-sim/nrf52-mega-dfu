@@ -2,3 +2,7 @@
 _bin
 *.user
 _temp
+megadfu/bootloader.hex
+megadfu/bootloader_setting.hex
+megadfu/firmware.hex
+megadfu/sd_bl.bin
