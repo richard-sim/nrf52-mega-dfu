@@ -1,0 +1,246 @@
+
+/*********************************************************************
+*
+*       OnProjectLoad
+*
+* Function description
+*   Project load routine. Required.
+*
+**********************************************************************
+*/
+void OnProjectLoad (void) {
+  //
+  // Dialog-generated settings
+  //
+  Project.SetDevice ("nRF52832_xxAA");
+  Project.SetHostIF ("USB", "");
+  Project.SetTargetIF ("SWD");
+  Project.SetTIFSpeed ("4 MHz");
+  //Project.SetRTT (1);
+  Project.AddSvdFile ("$(InstallDir)/Config/CPU/Cortex-M4F.svd");
+  Project.AddSvdFile ("$(InstallDir)/Config/Peripherals/ARMv7M.svd");
+  Project.AddSvdFile ("C:/dev/nRF5_SDK_15.3.0_59ac345/modules/nrfx/mdk/nrf52.svd");
+  //
+  // User settings
+  //
+  Project.AddPathSubstitute("/mnt/c/dev/proxxi-halo/megadfu-finalize", "$(ProjectDir)");
+  Project.AddPathSubstitute("/mnt/c/dev/nRF5_SDK_11.0.0_89a8197", "C:\dev\nRF5_SDK_11.0.0_89a8197");
+  File.Open ("$(ProjectDir)/_build/megadfu-finalize.out");
+  Exec.Command("SupplyPower = 0; SupplyPowerDefault = 0");
+}
+
+/*********************************************************************
+*
+*      TargetReset
+*
+* Function description
+*   Replaces the default target device reset routine. Optional.
+*
+* Notes
+*   This example demonstrates the usage when
+*   debugging a RAM program on a Cortex-M target device
+*
+**********************************************************************
+*/
+//void TargetReset (void) {
+//
+//  unsigned int SP;
+//  unsigned int PC;
+//  unsigned int VectorTableAddr;
+//
+//  Exec.Reset();
+//
+//  VectorTableAddr = Elf.GetBaseAddr();
+//
+//  if (VectorTableAddr != 0xFFFFFFFF) {
+//
+//    Util.Log("Resetting Program.");
+//
+//    SP = Target.ReadU32(VectorTableAddr);
+//    Target.SetReg("SP", SP);
+//
+//    PC = Target.ReadU32(VectorTableAddr + 4);
+//    Target.SetReg("PC", PC);
+//  }
+//}
+
+/*********************************************************************
+*
+*       BeforeTargetReset
+*
+* Function description
+*   Event handler routine. Optional.
+*
+**********************************************************************
+*/
+//void BeforeTargetReset (void) {
+//}
+
+/*********************************************************************
+*
+*       AfterTargetReset
+*
+* Function description
+*   Event handler routine. Optional.
+*
+**********************************************************************
+*/
+//void AfterTargetReset (void) {
+//}
+
+/*********************************************************************
+*
+*       DebugStart
+*
+* Function description
+*   Replaces the default debug session startup routine. Optional.
+*
+**********************************************************************
+*/
+//void DebugStart (void) {
+//  Exec.Connect();
+//  Exec.Reset();
+//  Exec.Download("$(ProjectDir)/.pioenvs/proxxihalo/package.hex");
+	//Target.LoadMemory("$(ProjectDir)/.pioenvs/proxxihalo/package.hex", 0x00000000);
+//}
+
+/*********************************************************************
+*
+*       TargetConnect
+*
+* Function description
+*   Replaces the default target IF connection routine. Optional.
+*
+**********************************************************************
+*/
+//void TargetConnect (void) {
+//}
+
+/*********************************************************************
+*
+*       BeforeTargetConnect
+*
+* Function description
+*   Event handler routine. Optional.
+*
+**********************************************************************
+*/
+//void BeforeTargetConnect (void) {
+//  Exec.Command("SupplyPower = 0");
+//}
+
+/*********************************************************************
+*
+*       AfterTargetConnect
+*
+* Function description
+*   Event handler routine. Optional.
+*
+**********************************************************************
+*/
+//void AfterTargetConnect (void) {
+	//0x20000400
+//	Target.LoadMemory("$(ProjectDir)/.pioenvs/proxxihalo/package.hex", 0x00000000);
+//}
+
+/*********************************************************************
+*
+*       TargetDownload
+*
+* Function description
+*   Replaces the default program download routine. Optional.
+*
+**********************************************************************
+*/
+void TargetDownload (void) {
+//	Util.Log("Downloading Program.");
+//
+//	 /* 1. Download the application program */
+//	Debug.Download();
+//
+//	 /* 2. Download the additional program image */
+//	Target.LoadMemory("$(ProjectDir)/.pioenvs/proxxihalo/package.hex", 0x20000400);
+  Exec.Download("$(ProjectDir)/_build/megadfu-finalize.hex");
+}
+
+/*********************************************************************
+*
+*       BeforeTargetDownload
+*
+* Function description
+*   Event handler routine. Optional.
+*
+**********************************************************************
+*/
+//void BeforeTargetDownload (void) {
+//}
+
+/*********************************************************************
+*
+*      AfterTargetDownload
+*
+* Function description
+*   Event handler routine.
+*
+* Notes
+*   This sample implementation demonstrates the application
+*   initialization on a Cortex-M target.
+*   If no initialization can be done, Target.Reset() may be called.
+*
+**********************************************************************
+*/
+//void AfterTargetDownload (void) {
+//
+//  unsigned int SP;
+//  unsigned int PC;
+//  unsigned int VectorTableAddr;
+//
+//  VectorTableAddr = Elf.GetBaseAddr();
+//
+//  if (VectorTableAddr != 0xFFFFFFFF) {
+//
+//    Util.Log("Initializing PC and SP.");
+//
+//    SP = Target.ReadU32(VectorTableAddr);
+//    Target.SetReg("SP", SP);
+//
+//    PC = Target.ReadU32(VectorTableAddr + 4);
+//    Target.SetReg("PC", PC);
+//  }
+//}
+
+/*********************************************************************
+*
+*       BeforeTargetDisconnect
+*
+* Function description
+*   Event handler routine. Optional.
+*
+**********************************************************************
+*/
+//void BeforeTargetDisconnect (void) {
+//}
+
+/*********************************************************************
+*
+*       AfterTargetDisconnect
+*
+* Function description
+*   Event handler routine. Optional.
+*
+**********************************************************************
+*/
+//void AfterTargetDisconnect (void) {
+//}
+
+/*********************************************************************
+*
+*       AfterTargetHalt
+*
+* Function description
+*   Event handler routine. Optional.
+*
+**********************************************************************
+*/
+//void AfterTargetHalt (void) {
+//}
