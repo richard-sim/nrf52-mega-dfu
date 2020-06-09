@@ -24,8 +24,9 @@ void OnProjectLoad (void) {
   // User settings
   //
   Project.AddPathSubstitute("/mnt/c/dev/proxxi-halo/sdk11-bootloader", "$(ProjectDir)");
+  Project.AddPathSubstitute("/mnt/c/dev/proxxi-ct-fw-bootstrap/sdk11-bootloader", "$(ProjectDir)");
   Project.AddPathSubstitute("/mnt/c/dev/nRF5_SDK_11.0.0_89a8197", "C:\dev\nRF5_SDK_11.0.0_89a8197");
-  File.Open ("$(ProjectDir)/bootloader/_build/sdk11_bootloader.out");
+  File.Open ("$(ProjectDir)/bootloader/_bin/sdk11_bootloader-79000.out");
   Exec.Command("SupplyPower = 0; SupplyPowerDefault = 0");
 }
 

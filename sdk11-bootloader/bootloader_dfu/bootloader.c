@@ -178,6 +178,10 @@ void bootloader_dfu_update_process(dfu_update_status_t update_status)
     }
     else if (update_status.status_code == DFU_UPDATE_BOOT_COMPLETE)
     {
+        //settings.bank_0         = p_bootloader_settings->bank_0;
+        //settings.bank_0_crc     = p_bootloader_settings->bank_0_crc;
+        //settings.bank_0_size    = p_bootloader_settings->bank_0_size;
+        //settings.bank_1         = BANK_VALID_BOOT;
         settings.bank_0         = BANK_VALID_BOOT;
         settings.bank_0_crc     = 0;
         settings.bank_0_size    = 0;

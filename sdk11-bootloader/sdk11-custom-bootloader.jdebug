@@ -24,6 +24,7 @@ void OnProjectLoad (void) {
   // User settings
   //
   Project.AddPathSubstitute("/mnt/c/dev/proxxi-halo/sdk11-bootloader", "$(ProjectDir)");
+  Project.AddPathSubstitute("/mnt/c/dev/proxxi-ct-fw-bootstrap/sdk11-bootloader", "$(ProjectDir)");
   Project.AddPathSubstitute("/mnt/c/dev/nRF5_SDK_11.0.0_89a8197", "C:\dev\nRF5_SDK_11.0.0_89a8197");
   File.Open ("$(ProjectDir)/bootloader/_bin/sdk11_bootloader-79000.out");
   Exec.Command("SupplyPower = 0; SupplyPowerDefault = 0");
@@ -161,7 +162,7 @@ void TargetDownload (void) {
 //	 /* 2. Download the additional program image */
 //	Target.LoadMemory("$(ProjectDir)/.pioenvs/proxxihalo/package.hex", 0x20000400);
 //  Exec.Download("$(ProjectDir)/pca10040/dual_bank_ble_s132/armgcc/_build/nrf52832_xxaa_s132.hex");
-  Exec.Download("$(ProjectDir)/_temp/sdk11-custom-bootloader.hex");
+  Exec.Download("$(ProjectDir)/_temp/sdk11-bootloader-dfu-from-stock.hex");
 }
 
 /*********************************************************************
