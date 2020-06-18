@@ -15,6 +15,7 @@ endif
 
 MK := mkdir
 RM := rm -rf
+CP := cp
 
 #echo suspend
 ifeq ("$(VERBOSE)","1")
@@ -49,7 +50,7 @@ BOOTLOADER_PAYLOAD_SOURCE_FILE  = $(abspath sd_bl.bin)
 BOOTLOADER_START                = 0x76000
 SETTINGS_PAYLOAD_SOURCE_FILE    = $(abspath bootloader_setting.hex)
 SETTINGS_START                  = 0x7E000
-APPLICATION_PAYLOAD_SOURCE_FILE = $(abspath firmware.hex)
+#APPLICATION_PAYLOAD_SOURCE_FILE = $(abspath firmware.hex)
 # Must match SoftDevice size
 APPLICATION_START               = 0x26000
 
@@ -153,13 +154,12 @@ help:
 	@echo 	megadfu
 	@echo 	flash_softdevice
 
-PAYLOAD_OBJECTS = \
-$(OBJECT_DIRECTORY)/payload_finalize.o \
-$(OBJECT_DIRECTORY)/payload_softdevice.o \
-$(OBJECT_DIRECTORY)/payload_bootloader.o \
-$(OBJECT_DIRECTORY)/payload_settings.o \
-$(OBJECT_DIRECTORY)/payload_application.o \
-$(OBJECT_DIRECTORY)/payload_descriptor.o
+PAYLOAD_OBJECTS  = $(OBJECT_DIRECTORY)/payload_finalize.o
+PAYLOAD_OBJECTS += $(OBJECT_DIRECTORY)/payload_softdevice.o
+PAYLOAD_OBJECTS += $(OBJECT_DIRECTORY)/payload_bootloader.o
+PAYLOAD_OBJECTS += $(OBJECT_DIRECTORY)/payload_settings.o
+# PAYLOAD_OBJECTS += $(OBJECT_DIRECTORY)/payload_application.o
+PAYLOAD_OBJECTS += $(OBJECT_DIRECTORY)/payload_descriptor.o
 
 C_SOURCE_FILE_NAMES = $(notdir $(C_SOURCE_FILES))
 C_PATHS = $(call remduplicates, $(dir $(C_SOURCE_FILES) ) )
@@ -203,9 +203,9 @@ $(OBJECT_DIRECTORY)/payload_settings.bin: $(SETTINGS_PAYLOAD_SOURCE_FILE)
 	@echo Payload file 1/3: $(notdir $<) 
 	$(NO_ECHO)$(OBJCOPY) -I ihex -O binary -B arm --gap-fill 0xFF $< $@
 
-$(OBJECT_DIRECTORY)/payload_application.bin: $(APPLICATION_PAYLOAD_SOURCE_FILE)
-	@echo Payload file 1/3: $(notdir $<) 
-	$(NO_ECHO)$(OBJCOPY) -I ihex -O binary -B arm --gap-fill 0xFF $< $@
+# $(OBJECT_DIRECTORY)/payload_application.bin: $(APPLICATION_PAYLOAD_SOURCE_FILE)
+# 	@echo Payload file 1/3: $(notdir $<) 
+# 	$(NO_ECHO)$(OBJCOPY) -I ihex -O binary -B arm --gap-fill 0xFF $< $@
 
 $(OBJECT_DIRECTORY)/payload_softdevice.lz4: $(OBJECT_DIRECTORY)/payload_softdevice.bin
 	@echo Payload file 2/3: $(notdir $<) 
@@ -219,16 +219,20 @@ $(OBJECT_DIRECTORY)/payload_settings.lz4: $(OBJECT_DIRECTORY)/payload_settings.b
 	@echo Payload file 2/3: $(notdir $<) 
 	$(NO_ECHO)$(LZ4) $< $@
 
-$(OBJECT_DIRECTORY)/payload_application.lz4: $(OBJECT_DIRECTORY)/payload_application.bin
-	@echo Payload file 2/3: $(notdir $<) 
-	$(NO_ECHO)$(LZ4) $< $@
+# $(OBJECT_DIRECTORY)/payload_application.lz4: $(OBJECT_DIRECTORY)/payload_application.bin
+# 	@echo Payload file 2/3: $(notdir $<) 
+# 	$(NO_ECHO)$(LZ4) $< $@
 
 $(OBJECT_DIRECTORY)/payload_descriptor.o: $(OBJECT_DIRECTORY)/payload_descriptor.bin
 	@echo Payload file 2/2: $(notdir $<) 
 	$(NO_ECHO)$(OBJCOPY) -I binary -O elf32-littlearm -B arm --rename-section .data=.payload_descriptor,alloc,load,readonly,data,contents $< $@
 
-$(OBJECT_DIRECTORY)/payload_finalize.o: $(FINALIZE_PAYLOAD_SOURCE_FILE)
-	@echo Payload file 1/1: $(notdir $<) 
+$(OBJECT_DIRECTORY)/payload_finalize.bin: $(FINALIZE_PAYLOAD_SOURCE_FILE)
+	@echo Payload file 1/2: $(notdir $<) 
+	$(NO_ECHO)$(CP) $< $@
+
+$(OBJECT_DIRECTORY)/payload_finalize.o: $(OBJECT_DIRECTORY)/payload_finalize.bin
+	@echo Payload file 2/2: $(notdir $<) 
 	$(NO_ECHO)$(OBJCOPY) -I binary -O elf32-littlearm -B arm --rename-section .data=.payload_finalize,alloc,load,readonly,data,contents $< $@
 
 $(OBJECT_DIRECTORY)/payload_softdevice.o: $(OBJECT_DIRECTORY)/payload_softdevice.lz4
@@ -243,9 +247,9 @@ $(OBJECT_DIRECTORY)/payload_settings.o: $(OBJECT_DIRECTORY)/payload_settings.lz4
 	@echo Payload file 3/3: $(notdir $<) 
 	$(NO_ECHO)$(OBJCOPY) -I binary -O elf32-littlearm -B arm --rename-section .data=.payload_settings,alloc,load,readonly,data,contents $< $@
 
-$(OBJECT_DIRECTORY)/payload_application.o: $(OBJECT_DIRECTORY)/payload_application.lz4
-	@echo Payload file 3/3: $(notdir $<) 
-	$(NO_ECHO)$(OBJCOPY) -I binary -O elf32-littlearm -B arm --rename-section .data=.payload_application,alloc,load,readonly,data,contents $< $@
+# $(OBJECT_DIRECTORY)/payload_application.o: $(OBJECT_DIRECTORY)/payload_application.lz4
+# 	@echo Payload file 3/3: $(notdir $<) 
+# 	$(NO_ECHO)$(OBJCOPY) -I binary -O elf32-littlearm -B arm --rename-section .data=.payload_application,alloc,load,readonly,data,contents $< $@
 
 #$(OBJECT_DIRECTORY)/%.o: %.dat
 #	@echo Payload DAT file: $(notdir $<)

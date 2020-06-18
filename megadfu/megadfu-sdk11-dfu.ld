@@ -6,7 +6,7 @@ GROUP(-lgcc -lc -lnosys)
 
 MEMORY
 {
-  FLASH (rx) : ORIGIN = 0x26000, LENGTH = 0x51000 /* 0x5B000 = 0x80000 - 0x26000 - 28kb (bootloader) - 4kb (bl settings page) - 4kb (mbr settings page) */
+  FLASH (rx) : ORIGIN = 0x26000, LENGTH = 0x4F000 /* 0x4F000 = 0x75000 (megadfu-finalize location) - 0x26000 (origin) */
   RAM (rwx) :  ORIGIN = 0x20002080, LENGTH = 0xdf80
 }
 

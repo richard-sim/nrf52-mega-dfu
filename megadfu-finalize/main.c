@@ -24,34 +24,34 @@ typedef struct
 	unsigned char write_buf_size;
 } StreamContext_t;
 
-static uint32_t sLastAddress = ~0ul;
-static void stream_eraser_writer(void* ctx, unsigned char val)
-{
-	StreamContext_t* p_stream_context = (StreamContext_t*)ctx;
+// static uint32_t sLastAddress = ~0ul;
+// static void stream_eraser_writer(void* ctx, unsigned char val)
+// {
+// 	StreamContext_t* p_stream_context = (StreamContext_t*)ctx;
 
-	if (p_stream_context->write_buf_size < sizeof(p_stream_context->write_buf))
-	{
-		p_stream_context->write_buf[p_stream_context->write_buf_size++] = val;
-		return;
-	}
+// 	if (p_stream_context->write_buf_size < sizeof(p_stream_context->write_buf))
+// 	{
+// 		p_stream_context->write_buf[p_stream_context->write_buf_size++] = val;
+// 		return;
+// 	}
 
-	unsigned char* pWB = p_stream_context->write_buf;
-	uint32_t word_val = (val << 24) | (pWB[2] << 16) | (pWB[1] << 8) | pWB[0];
+// 	unsigned char* pWB = p_stream_context->write_buf;
+// 	uint32_t word_val = (val << 24) | (pWB[2] << 16) | (pWB[1] << 8) | pWB[0];
 
-	uint32_t lastPage = sLastAddress / 0x1000;
-	uint32_t currPage = (uint32_t)p_stream_context->pCurr / 0x1000;
-	if (currPage != lastPage) {
-		// Page boundary; erase the new page before we try to write to it
-		prx_nvmc_page_erase((uint32_t)p_stream_context->pCurr & ~(0x1000-1));
-	}
+// 	uint32_t lastPage = sLastAddress / 0x1000;
+// 	uint32_t currPage = (uint32_t)p_stream_context->pCurr / 0x1000;
+// 	if (currPage != lastPage) {
+// 		// Page boundary; erase the new page before we try to write to it
+// 		prx_nvmc_page_erase((uint32_t)p_stream_context->pCurr & ~(0x1000-1));
+// 	}
 
-	prx_nvmc_write_word((uint32_t)p_stream_context->pCurr, word_val);
+// 	prx_nvmc_write_word((uint32_t)p_stream_context->pCurr, word_val);
 	
-	sLastAddress = (uint32_t)p_stream_context->pCurr;
-	p_stream_context->pCurr++;
+// 	sLastAddress = (uint32_t)p_stream_context->pCurr;
+// 	p_stream_context->pCurr++;
 
-	p_stream_context->write_buf_size = 0;
-}
+// 	p_stream_context->write_buf_size = 0;
+// }
 
 static void stream_writer(void* ctx, unsigned char val)
 {
@@ -147,14 +147,14 @@ typedef struct {
 // Never inline this function as we need the PayloadDescriptor_t to be on the stack
 // as the original will be obliterated at some point by the erase/write ops
 void __attribute__ ((noinline)) perform_finalize(PayloadDescriptor_t payloadDescriptor) {
-	uint32_t payload_softdevice_lz4_start	= NRF_UICR->CUSTOMER[24];
-	uint32_t payload_softdevice_lz4_end		= NRF_UICR->CUSTOMER[25];
-	uint32_t payload_bootloader_lz4_start	= NRF_UICR->CUSTOMER[26];
-	uint32_t payload_bootloader_lz4_end		= NRF_UICR->CUSTOMER[27];
-	uint32_t payload_settings_lz4_start		= NRF_UICR->CUSTOMER[28];
-	uint32_t payload_settings_lz4_end		= NRF_UICR->CUSTOMER[29];
-	uint32_t payload_application_lz4_start	= NRF_UICR->CUSTOMER[30];
-	uint32_t payload_application_lz4_end	= NRF_UICR->CUSTOMER[31];
+	uint32_t payload_softdevice_lz4_start	= NRF_UICR->CUSTOMER[26];
+	uint32_t payload_softdevice_lz4_end		= NRF_UICR->CUSTOMER[27];
+	uint32_t payload_bootloader_lz4_start	= NRF_UICR->CUSTOMER[28];
+	uint32_t payload_bootloader_lz4_end		= NRF_UICR->CUSTOMER[29];
+	uint32_t payload_settings_lz4_start		= NRF_UICR->CUSTOMER[30];
+	uint32_t payload_settings_lz4_end		= NRF_UICR->CUSTOMER[31];
+	// uint32_t payload_application_lz4_start	= NRF_UICR->CUSTOMER[30];
+	// uint32_t payload_application_lz4_end	= NRF_UICR->CUSTOMER[31];
 
 	StreamDecompress_e stream_result;
 
@@ -203,17 +203,21 @@ void __attribute__ ((noinline)) perform_finalize(PayloadDescriptor_t payloadDesc
 	if (stream_result != STREAM_OK) {
 	}
 
-	// Application
-	unsigned char* pAppCompressedStart = (unsigned char*)payload_application_lz4_start;
-	unsigned char* pAppCompressedEnd = (unsigned char*)payload_application_lz4_end;
-	unsigned int appCompressedSize = (uint32_t)(pAppCompressedEnd - pAppCompressedStart);
-	unsigned int appSize = 0;
-	stream_result = stream_decompress(
-		stream_eraser_writer, stream_reader,
-		pAppCompressedStart, appCompressedSize, 
-		payloadDescriptor.app_start, &appSize);
-	if (stream_result != STREAM_OK) {
+	// Application disabled - erase application area instead
+	for (uint32_t eraseAddress=(uint32_t)payloadDescriptor.app_start; eraseAddress<(uint32_t)payloadDescriptor.finalize_start; eraseAddress+=0x1000) {
+		prx_nvmc_page_erase(eraseAddress);
 	}
+	// unsigned char* pAppCompressedStart = (unsigned char*)payload_application_lz4_start;
+	// unsigned char* pAppCompressedEnd = (unsigned char*)payload_application_lz4_end;
+	// unsigned int appCompressedSize = (uint32_t)(pAppCompressedEnd - pAppCompressedStart);
+	// unsigned int appSize = 0;
+	// sLastAddress = ~0ul;
+	// stream_result = stream_decompress(
+	// 	stream_eraser_writer, stream_reader,
+	// 	pAppCompressedStart, appCompressedSize, 
+	// 	payloadDescriptor.app_start, &appSize);
+	// if (stream_result != STREAM_OK) {
+	// }
 }
 
 //static volatile uint32_t sFinalizeActivate = 0;
@@ -223,8 +227,8 @@ int main(void) {
 //		// Wait
 //	}
 
-	uint32_t payload_descriptor_bin_start	= NRF_UICR->CUSTOMER[22];
-	//uint32_t payload_descriptor_bin_end		= NRF_UICR->CUSTOMER[23];
+	uint32_t payload_descriptor_bin_start	= NRF_UICR->CUSTOMER[24];
+	//uint32_t payload_descriptor_bin_end		= NRF_UICR->CUSTOMER[25];
 
 	//
 	PayloadDescriptor_t* pPayloadDescriptor = (PayloadDescriptor_t*)payload_descriptor_bin_start;
