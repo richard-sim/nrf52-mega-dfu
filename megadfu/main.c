@@ -1,6 +1,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "nrf.h"
+#include "app_util_platform.h"
+#include "nrf_wdt.h"
 #include "bootloader_util.h"
 
 #include "prx_nvmc.h"
@@ -33,10 +35,54 @@ typedef struct {
 //static volatile uint32_t sMegaDFUActivate = 0;
 
 
+// static void on_wdt_timeout() {
+// 	//
+// }
+
+void WDT_IRQHandler() {
+    if (nrf_wdt_int_enable_check(NRF_WDT_INT_TIMEOUT_MASK) == true) {
+        nrf_wdt_event_clear(NRF_WDT_EVENT_TIMEOUT);
+    }
+}
+
+
 int main(void) {
 //	while (sMegaDFUActivate == 0) {
 //		// Wait
 //	}
+
+	if (nrf_wdt_started()) {
+		// WDT is already running; feed it
+		for(uint32_t i = 0; i < NRF_WDT_CHANNEL_NUMBER; i++) {
+			nrf_wdt_rr_register_t reload_reg = (nrf_wdt_rr_register_t)(NRF_WDT_RR0 + i);
+			if (nrf_wdt_reload_request_is_enabled(reload_reg)) {
+				nrf_wdt_reload_request_set(reload_reg);
+			}
+		}
+	} else {
+		// WDT isn't running yet, so start it. This is done so that we can rely on it
+		// always running (we expect to come in here with it running, so this is only
+		// to be safe)
+
+		// nrf_drv_wdt_init(NULL, on_wdt_timeout);
+		nrf_wdt_behaviour_set(NRF_WDT_BEHAVIOUR_RUN_SLEEP);
+		nrf_wdt_reload_value_set((20000 * 32768) / 1000);
+
+		NVIC_SetPriority(WDT_IRQn, APP_IRQ_PRIORITY_HIGH);
+		NVIC_ClearPendingIRQ(WDT_IRQn);
+		NVIC_EnableIRQ(WDT_IRQn);
+
+		// nrf_drv_wdt_channel_id wdt_channel;
+		// nrf_drv_wdt_channel_alloc(&wdt_channel);
+		nrf_wdt_reload_request_enable(NRF_WDT_RR0);
+
+		// nrf_drv_wdt_enable();
+		nrf_wdt_int_enable(NRF_WDT_INT_TIMEOUT_MASK);
+		nrf_wdt_task_trigger(NRF_WDT_TASK_START);
+
+		// nrf_drv_wdt_feed();
+		nrf_wdt_reload_request_set(NRF_WDT_RR0);
+	}
 	
 	PayloadDescriptor_t* pPayloadDescriptor = (PayloadDescriptor_t*)&_binary__build_obj_payload_descriptor_bin_start;
 

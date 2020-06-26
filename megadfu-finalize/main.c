@@ -235,7 +235,12 @@ int main(void) {
 	perform_finalize(*pPayloadDescriptor);
 	
 	// DONE!
-	NVIC_SystemReset();
+	//NVIC_SystemReset();
+	// Wait for WDT, as it will be running with the OEM bootloader's configuration
+	// and the only way to stop/clear it is to reset due to WDT.
+	while (1) {
+		// Do nothing
+	}
 
 	return 0;
 }

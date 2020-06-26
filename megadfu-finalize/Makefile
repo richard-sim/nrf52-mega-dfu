@@ -37,11 +37,10 @@ SIZE            := '$(GNU_INSTALL_ROOT)/bin/$(GNU_PREFIX)-size'
 remduplicates = $(strip $(if $1,$(firstword $1) $(call remduplicates,$(filter-out $(firstword $1),$1))))
 
 # Source common to all targets
-C_SOURCE_FILES = \
-$(abspath LZ4.c) \
-$(abspath prx_nvmc.c) \
-$(abspath main.c) \
-$(abspath $(NRF_SDK_PATH)/components/toolchain/system_nrf52.c)
+C_SOURCE_FILES  = $(abspath LZ4.c)
+C_SOURCE_FILES += $(abspath prx_nvmc.c)
+C_SOURCE_FILES += $(abspath main.c)
+C_SOURCE_FILES += $(abspath $(NRF_SDK_PATH)/components/toolchain/system_nrf52.c)
 
 # Assembly files common to all targets
 ASM_SOURCE_FILES = $(abspath $(NRF_SDK_PATH)/components/toolchain/gcc/gcc_startup_nrf52.s)
