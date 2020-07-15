@@ -33,7 +33,7 @@ NM              := '$(GNU_INSTALL_ROOT)/bin/$(GNU_PREFIX)-nm'
 OBJDUMP         := '$(GNU_INSTALL_ROOT)/bin/$(GNU_PREFIX)-objdump'
 OBJCOPY         := '$(GNU_INSTALL_ROOT)/bin/$(GNU_PREFIX)-objcopy'
 SIZE            := '$(GNU_INSTALL_ROOT)/bin/$(GNU_PREFIX)-size'
-LZ4				:= $(abspath lz4.exe)
+LZ4				:= $(abspath lz4)
 MERGEHEX		:= $(abspath mergehex)
 
 # Function for removing duplicates in a list

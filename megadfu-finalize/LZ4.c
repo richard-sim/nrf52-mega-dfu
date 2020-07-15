@@ -22,17 +22,18 @@
 //**************************************
 #include <stdlib.h>   // for malloc
 #include <string.h>   // for memset
+#include <stdint.h>   // for ?int??_t
 #include "lz4.h"
 
 
 //**************************************
 // Basic Types
 //**************************************
-#define BYTE	unsigned char
-#define U16		unsigned short
-#define U32		unsigned long
-#define S32		signed long
-#define U64		unsigned long long
+#define BYTE	uint8_t
+#define U16		uint16_t
+#define U32		uint32_t
+#define S32		int32_t
+#define U64		uint64_t
 
 
 //**************************************
@@ -67,7 +68,7 @@ struct refTables
 //**************************************
 // Macros
 //**************************************
-#define HASH_FUNCTION(i)	((i * 2654435761) >> ((MINMATCH*8)-HASH_LOG))
+#define HASH_FUNCTION(i)	((U32)(i * (U32)2654435761) >> ((MINMATCH*8)-HASH_LOG))
 #define HASH_VALUE(p)		HASH_FUNCTION(*(U32*)p)
 #define HASH_POINTER(p)		HashTable[HASH_VALUE(p)]
 
@@ -107,7 +108,8 @@ int LZ4_compressCtx(void** ctx,
 			*ref,
 			*orun, *l_end;
 	
-	int		len, length, sequence, h;
+	int		len, length;
+	U32		sequence, h;
 	U32		step=1;
 	S32		limit=INCOMPRESSIBLE;
 
