@@ -23,7 +23,7 @@
 #include <stdlib.h>   // for malloc
 #include <string.h>   // for memset
 #include <stdint.h>   // for ?int??_t
-#include "lz4.h"
+#include "LZ4.h"
 
 
 //**************************************
