@@ -37,9 +37,10 @@
 
 
 // Low frequency clock source to be used by the SoftDevice
-#define NRF_CLOCK_LFCLKSRC      {.source        = NRF_CLOCK_LF_SRC_XTAL,            \
-                                 .rc_ctiv       = 0,                                \
-                                 .rc_temp_ctiv  = 0,                                \
-                                 .xtal_accuracy = NRF_CLOCK_LF_XTAL_ACCURACY_20_PPM}
+// https://devzone.nordicsemi.com/f/nordic-q-a/15363/change-clock-source-nrf52832-app-beacon-example
+#define NRF_CLOCK_LFCLKSRC      {.source        = NRF_CLOCK_LF_SRC_RC,              \
+                                 .rc_ctiv       = 16,                               \
+                                 .rc_temp_ctiv  = 2,                                \
+                                 .xtal_accuracy = NRF_CLOCK_LF_XTAL_ACCURACY_250_PPM}
 
 #endif // CUSTOM_BOARD_H

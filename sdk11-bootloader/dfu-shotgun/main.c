@@ -748,13 +748,13 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
             err_code = sd_ble_gap_sec_params_reply(m_conn_handle, BLE_GAP_SEC_STATUS_PAIRING_NOT_SUPP, NULL, NULL);
             APP_ERROR_CHECK(err_code);
             break;
-
+#if 0
         // Upon terminated advertising (time-out), the next advertising mode is started.
         case BLE_GAP_EVT_ADV_SET_TERMINATED:
 			err_code = ble_advertising_start(BLE_ADV_MODE_FAST);
 			APP_ERROR_CHECK(err_code);
             break;
-
+#endif
         case BLE_GATTS_EVT_SYS_ATTR_MISSING:
             // No system attributes have been stored.
             err_code = sd_ble_gatts_sys_attr_set(m_conn_handle, NULL, 0, 0);

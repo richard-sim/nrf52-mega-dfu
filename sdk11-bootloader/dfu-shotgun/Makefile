@@ -35,7 +35,7 @@ NM              := '$(GNU_INSTALL_ROOT)/bin/$(GNU_PREFIX)-nm'
 OBJDUMP         := '$(GNU_INSTALL_ROOT)/bin/$(GNU_PREFIX)-objdump'
 OBJCOPY         := '$(GNU_INSTALL_ROOT)/bin/$(GNU_PREFIX)-objcopy'
 SIZE            := '$(GNU_INSTALL_ROOT)/bin/$(GNU_PREFIX)-size'
-LZ4				:= $(abspath $(MEGADFU_PATH)/lz4.exe)
+LZ4				:= $(abspath $(MEGADFU_PATH)/lz4)
 
 #function for removing duplicates in a list
 remduplicates = $(strip $(if $1,$(firstword $1) $(call remduplicates,$(filter-out $(firstword $1),$1))))
