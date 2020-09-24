@@ -101,8 +101,6 @@ int main(void) {
 	// Restore the appropriate settings
 	prx_nvmc_write_word((uint32_t)&(NRF_UICR->NRFFW[0]), (uint32_t)pPayloadDescriptor->bl_start);
 	prx_nvmc_write_word((uint32_t)&(NRF_UICR->NRFFW[1]), 		0x7E000ul);		// Always FLASH_SIZE-2*CODE_PAGE_SIZE
-	prx_nvmc_write_word((uint32_t)&(NRF_UICR->PSELRESET[0]), 	0x15ul);		// Enabled on Pin 21
-	prx_nvmc_write_word((uint32_t)&(NRF_UICR->PSELRESET[1]), 	0x15ul);		// copy of [0]
 	prx_nvmc_write_word((uint32_t)&(NRF_UICR->APPROTECT), 		0xFFFFFF00ul);	// APPROTECT enabled
 	prx_nvmc_write_word((uint32_t)&(NRF_UICR->NFCPINS), 		0xFFFFFFFEul);	// NFC pins disabled
 	
