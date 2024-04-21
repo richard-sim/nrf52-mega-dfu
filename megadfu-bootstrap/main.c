@@ -12,8 +12,11 @@ int main(void) {
 
   nrf_gpio_cfg_output(GPIO_OUTPUT_PIN_NUMBER);
   nrf_gpio_pin_set(GPIO_OUTPUT_PIN_NUMBER);
+  for (unsigned ix=0;ix<0x100;ix++);
   nrf_gpio_pin_clear(GPIO_OUTPUT_PIN_NUMBER);
+  for (unsigned ix=0;ix<0x100;ix++);
   nrf_gpio_pin_set(GPIO_OUTPUT_PIN_NUMBER);
+  for (unsigned ix=0;ix<0x100;ix++);
   nrf_gpio_pin_clear(GPIO_OUTPUT_PIN_NUMBER);
   for (unsigned ix=0;ix<0x10000;ix++);
 
