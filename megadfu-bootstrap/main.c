@@ -11,8 +11,10 @@
 int main(void) {
 
   nrf_gpio_cfg_output(GPIO_OUTPUT_PIN_NUMBER);
-  nrf_gpio_pin_toggle(GPIO_OUTPUT_PIN_NUMBER);
-  nrf_gpio_pin_toggle(GPIO_OUTPUT_PIN_NUMBER);
+  nrf_gpio_pin_set(GPIO_OUTPUT_PIN_NUMBER);
+  nrf_gpio_pin_clear(GPIO_OUTPUT_PIN_NUMBER);
+  nrf_gpio_pin_set(GPIO_OUTPUT_PIN_NUMBER);
+  nrf_gpio_pin_clear(GPIO_OUTPUT_PIN_NUMBER);
   for (unsigned ix=0;ix<0x10000;ix++);
 
 	// Just forward on to MegaDFU, which is located at an offset that won't be obliterated by the incoming SoftDevice update
