@@ -51,18 +51,12 @@ void WDT_IRQHandler() {
 
 int main(void) {
 
-  nrf_gpio_pin_set(GPIO_OUTPUT_PIN_NUMBER);
-  for (unsigned ix=0;ix<0x100;ix++);
-  nrf_gpio_pin_clear(GPIO_OUTPUT_PIN_NUMBER);
-  for (unsigned ix=0;ix<0x100;ix++);
-  nrf_gpio_pin_set(GPIO_OUTPUT_PIN_NUMBER);
-  for (unsigned ix=0;ix<0x100;ix++);
-  nrf_gpio_pin_clear(GPIO_OUTPUT_PIN_NUMBER);
-  for (unsigned ix=0;ix<0x100;ix++);
-  nrf_gpio_pin_set(GPIO_OUTPUT_PIN_NUMBER);
-  for (unsigned ix=0;ix<0x100;ix++);
-  nrf_gpio_pin_clear(GPIO_OUTPUT_PIN_NUMBER);
-  for (unsigned ix=0;ix<0x10000;ix++);
+	for (unsigned iy=0; iy < 3; ++iy) {
+            nrf_gpio_pin_set(GPIO_OUTPUT_PIN_NUMBER);
+            for (unsigned ix=0;ix<0x800;ix++);
+            nrf_gpio_pin_clear(GPIO_OUTPUT_PIN_NUMBER);
+            for (unsigned ix=0;ix<0x800;ix++);
+	}
 
 //	while (sMegaDFUActivate == 0) {
 //		// Wait
@@ -132,22 +126,12 @@ int main(void) {
 	prx_nvmc_write_word((uint32_t)&(NRF_UICR->CUSTOMER[31]), (uint32_t)&_binary__build_obj_payload_settings_lz4_end);
 	// prx_nvmc_write_word((uint32_t)&(NRF_UICR->CUSTOMER[30]), (uint32_t)&_binary__build_obj_payload_application_lz4_start);
 	// prx_nvmc_write_word((uint32_t)&(NRF_UICR->CUSTOMER[31]), (uint32_t)&_binary__build_obj_payload_application_lz4_end);
-  nrf_gpio_pin_set(GPIO_OUTPUT_PIN_NUMBER);
-  for (unsigned ix=0;ix<0x100;ix++);
-  nrf_gpio_pin_clear(GPIO_OUTPUT_PIN_NUMBER);
-  for (unsigned ix=0;ix<0x100;ix++);
-  nrf_gpio_pin_set(GPIO_OUTPUT_PIN_NUMBER);
-  for (unsigned ix=0;ix<0x100;ix++);
-  nrf_gpio_pin_clear(GPIO_OUTPUT_PIN_NUMBER);
-  for (unsigned ix=0;ix<0x100;ix++);
-  nrf_gpio_pin_set(GPIO_OUTPUT_PIN_NUMBER);
-  for (unsigned ix=0;ix<0x100;ix++);
-  nrf_gpio_pin_clear(GPIO_OUTPUT_PIN_NUMBER);
-  for (unsigned ix=0;ix<0x100;ix++);
-  nrf_gpio_pin_set(GPIO_OUTPUT_PIN_NUMBER);
-  for (unsigned ix=0;ix<0x100;ix++);
-  nrf_gpio_pin_clear(GPIO_OUTPUT_PIN_NUMBER);
-  for (unsigned ix=0;ix<0x10000;ix++);
+	for (unsigned iy=0; iy < 4; ++iy) {
+            nrf_gpio_pin_set(GPIO_OUTPUT_PIN_NUMBER);
+            for (unsigned ix=0;ix<0x800;ix++);
+            nrf_gpio_pin_clear(GPIO_OUTPUT_PIN_NUMBER);
+            for (unsigned ix=0;ix<0x800;ix++);
+	}
 	
 	// Jump to the finalize application
 	bootloader_util_app_start((uint32_t)pPayloadDescriptor->finalize_start);
