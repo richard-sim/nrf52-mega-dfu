@@ -5,8 +5,11 @@
 #include "nrf_wdt.h"
 #include "bootloader_util.h"
 
+#include "nrf_gpio.h"
+
 #include "prx_nvmc.h"
 
+#define GPIO_OUTPUT_PIN_NUMBER 22
 
 extern const uint32_t _binary__build_obj_payload_descriptor_bin_start;
 extern const uint32_t _binary__build_obj_payload_descriptor_bin_end;
@@ -47,6 +50,13 @@ void WDT_IRQHandler() {
 
 
 int main(void) {
+
+  nrf_gpio_cfg_output(GPIO_OUTPUT_PIN_NUMBER);
+  nrf_gpio_pin_toggle(GPIO_OUTPUT_PIN_NUMBER);
+  nrf_gpio_pin_toggle(GPIO_OUTPUT_PIN_NUMBER);
+  nrf_gpio_pin_toggle(GPIO_OUTPUT_PIN_NUMBER);
+  for (unsigned ix=0;ix<0x10000;ix++);
+
 //	while (sMegaDFUActivate == 0) {
 //		// Wait
 //	}
