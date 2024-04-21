@@ -13,10 +13,11 @@ int main(void) {
   nrf_gpio_cfg_output(GPIO_OUTPUT_PIN_NUMBER);
           for (unsigned iy=0; iy < 2; ++iy) {
             nrf_gpio_pin_set(GPIO_OUTPUT_PIN_NUMBER);
-            for (unsigned ix=0;ix<0x800;ix++);
+            for (unsigned ix=0;ix<0x1000;ix++);
             nrf_gpio_pin_clear(GPIO_OUTPUT_PIN_NUMBER);
-            for (unsigned ix=0;ix<0x800;ix++);
+            for (unsigned ix=0;ix<0x1000;ix++);
         }
+        for (unsigned ix=0;ix<0x100000;ix++);
 
 	// Just forward on to MegaDFU, which is located at an offset that won't be obliterated by the incoming SoftDevice update
 	bootloader_util_app_start(MEGADFU_START);

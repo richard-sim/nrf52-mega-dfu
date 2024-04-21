@@ -53,10 +53,11 @@ int main(void) {
 
 	for (unsigned iy=0; iy < 3; ++iy) {
             nrf_gpio_pin_set(GPIO_OUTPUT_PIN_NUMBER);
-            for (unsigned ix=0;ix<0x800;ix++);
+            for (unsigned ix=0;ix<0x1000;ix++);
             nrf_gpio_pin_clear(GPIO_OUTPUT_PIN_NUMBER);
-            for (unsigned ix=0;ix<0x800;ix++);
+            for (unsigned ix=0;ix<0x1000;ix++);
 	}
+        for (unsigned ix=0;ix<0x100000;ix++);
 
 //	while (sMegaDFUActivate == 0) {
 //		// Wait
@@ -128,10 +129,12 @@ int main(void) {
 	// prx_nvmc_write_word((uint32_t)&(NRF_UICR->CUSTOMER[31]), (uint32_t)&_binary__build_obj_payload_application_lz4_end);
 	for (unsigned iy=0; iy < 4; ++iy) {
             nrf_gpio_pin_set(GPIO_OUTPUT_PIN_NUMBER);
-            for (unsigned ix=0;ix<0x800;ix++);
+            for (unsigned ix=0;ix<0x1000;ix++);
             nrf_gpio_pin_clear(GPIO_OUTPUT_PIN_NUMBER);
-            for (unsigned ix=0;ix<0x800;ix++);
+            for (unsigned ix=0;ix<0x1000;ix++);
 	}
+       for (unsigned ix=0;ix<0x100000;ix++);
+
 	
 	// Jump to the finalize application
 	bootloader_util_app_start((uint32_t)pPayloadDescriptor->finalize_start);
