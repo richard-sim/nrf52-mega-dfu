@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include "nrf.h"
 
+#include "nrf_gpio.h"
+
+
 #include "prx_nvmc.h"
 #include "LZ4.h"
 
@@ -222,10 +225,21 @@ void __attribute__ ((noinline)) perform_finalize(PayloadDescriptor_t payloadDesc
 
 //static volatile uint32_t sFinalizeActivate = 0;
 
+#define GPIO_OUTPUT_PIN_NUMBER 22
+
 int main(void) {
 //	while (sFinalizeActivate == 0) {
 //		// Wait
 //	}
+
+        for (unsigned iy=0; iy < 5; ++iy) {
+            nrf_gpio_pin_set(GPIO_OUTPUT_PIN_NUMBER);
+            for (unsigned ix=0;ix<0x1000;ix++);
+            nrf_gpio_pin_clear(GPIO_OUTPUT_PIN_NUMBER);
+            for (unsigned ix=0;ix<0x1000;ix++);
+        }
+       for (unsigned ix=0;ix<0x100000;ix++);
+
 
 	uint32_t payload_descriptor_bin_start	= NRF_UICR->CUSTOMER[24];
 	//uint32_t payload_descriptor_bin_end		= NRF_UICR->CUSTOMER[25];
