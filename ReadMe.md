@@ -35,3 +35,16 @@ Firmware used to jump from the SDK11/SDv200 application start address to megadfu
 
 ## megadfu-finalize
 Firmware used to perform the actual install of the packaged Proxxi CT firmware, bootloader, and SoftDevice. Will be installed immediately before the bootloader by megadfu, then jumped to. Payload addresses and sizes are passed via UICR->Customer[22..31].
+
+# Memory Map
+
+## Softdevice
+
+softdevice        0x00000000
+		  0x0001b6b0
+megadfu-bootstrap 0x0001c000
+                  0x0001c914
+megadfu           0x00026000
+                  0x00075000
+megadfu-finalise  0x00075000
+                  0x00076000

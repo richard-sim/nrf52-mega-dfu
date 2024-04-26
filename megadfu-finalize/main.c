@@ -232,15 +232,6 @@ int main(void) {
 //		// Wait
 //	}
 
-        for (unsigned iy=0; iy < 5; ++iy) {
-            nrf_gpio_pin_set(GPIO_OUTPUT_PIN_NUMBER);
-            for (unsigned ix=0;ix<0x1000;ix++);
-            nrf_gpio_pin_clear(GPIO_OUTPUT_PIN_NUMBER);
-            for (unsigned ix=0;ix<0x1000;ix++);
-        }
-       for (unsigned ix=0;ix<0x100000;ix++);
-
-
 	uint32_t payload_descriptor_bin_start	= NRF_UICR->CUSTOMER[24];
 	//uint32_t payload_descriptor_bin_end		= NRF_UICR->CUSTOMER[25];
 
