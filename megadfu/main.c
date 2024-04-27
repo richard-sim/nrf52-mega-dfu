@@ -86,6 +86,10 @@ int main(void) {
 		// nrf_drv_wdt_feed();
 		nrf_wdt_reload_request_set(NRF_WDT_RR0);
 	}
+
+	nrf_drv_uart_init(NRF_DRV_UART_DEFAULT_CONFIG, NULL);
+	const uint8_t data[] = "Hi!\r\n";
+	nrf_drv_uart_tx(data, sizeof(data)-1)
 	
 	PayloadDescriptor_t* pPayloadDescriptor = (PayloadDescriptor_t*)&_binary__build_obj_payload_descriptor_bin_start;
 
