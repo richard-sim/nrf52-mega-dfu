@@ -48,3 +48,5 @@ megadfu           0x00026000
                   0x00075000
 megadfu-finalise  0x00075000
                   0x00076000
+bootloader616     0x00079000
+                  0x0007ffff

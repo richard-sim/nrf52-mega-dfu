@@ -98,23 +98,10 @@ int main(void) {
 	unsigned int finalizeSize = (uint32_t)(pFinalizeEnd - pFinalizeStart);
 	prx_nvmc_write_words((uint32_t)pPayloadDescriptor->finalize_start, (uint32_t*)pFinalizeStart, finalizeSize / sizeof(uint32_t));
 	
-          for (unsigned iy=0; iy < 2; ++iy) {
-            nrf_gpio_pin_set(GPIO_OUTPUT_PIN_NUMBER);
-            for (unsigned ix=0;ix<0x1000;ix++);
-            nrf_gpio_pin_clear(GPIO_OUTPUT_PIN_NUMBER);
-            for (unsigned ix=0;ix<0x1000;ix++);
-        }
-        for (unsigned ix=0;ix<0x100000;ix++);
 	// Erase the UICR so that we can be sure that storing the payload addresses in UICR->Customer is safe
 	// NOTE: This will obliterate the NRFFW[0], NRFFW[1], PSELRESET[0], PSELRESET[1], APPROTECT, and NFCPINS values
 	prx_nvmc_page_erase((uint32_t)NRF_UICR);
-          for (unsigned iy=0; iy < 3; ++iy) {
-            nrf_gpio_pin_set(GPIO_OUTPUT_PIN_NUMBER);
-            for (unsigned ix=0;ix<0x1000;ix++);
-            nrf_gpio_pin_clear(GPIO_OUTPUT_PIN_NUMBER);
-            for (unsigned ix=0;ix<0x1000;ix++);
-        }
-        for (unsigned ix=0;ix<0x100000;ix++);
+
 	// Restore the appropriate settings
 	prx_nvmc_write_word((uint32_t)&(NRF_UICR->NRFFW[0]), (uint32_t)pPayloadDescriptor->bl_start);
 	prx_nvmc_write_word((uint32_t)&(NRF_UICR->NRFFW[1]), 		0x7E000ul);		// Always FLASH_SIZE-2*CODE_PAGE_SIZE
