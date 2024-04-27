@@ -5,6 +5,8 @@
 #include "nrf_wdt.h"
 #include "bootloader_util.h"
 
+#include "nrf_drv_uart.h"
+
 #include "nrf_gpio.h"
 
 #include "prx_nvmc.h"
