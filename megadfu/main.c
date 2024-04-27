@@ -119,7 +119,14 @@ int main(void) {
 	prx_nvmc_write_word((uint32_t)&(NRF_UICR->CUSTOMER[31]), (uint32_t)&_binary__build_obj_payload_settings_lz4_end);
 	// prx_nvmc_write_word((uint32_t)&(NRF_UICR->CUSTOMER[30]), (uint32_t)&_binary__build_obj_payload_application_lz4_start);
 	// prx_nvmc_write_word((uint32_t)&(NRF_UICR->CUSTOMER[31]), (uint32_t)&_binary__build_obj_payload_application_lz4_end);
-	
+
+	while(1) {
+            nrf_gpio_pin_set(GPIO_OUTPUT_PIN_NUMBER);
+            for (unsigned ix=0;ix<0x1000;ix++);
+            nrf_gpio_pin_clear(GPIO_OUTPUT_PIN_NUMBER);
+            for (unsigned ix=0;ix<0x1000;ix++);
+        }
+
 	// Jump to the finalize application
 	bootloader_util_app_start((uint32_t)pPayloadDescriptor->finalize_start);
 
