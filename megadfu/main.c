@@ -7,11 +7,11 @@
 
 #include "nrf_drv_uart.h"
 
-#include "nrf_gpio.h"
-
 #include "prx_nvmc.h"
 
-#define GPIO_OUTPUT_PIN_NUMBER 22
+#define STRINGIZE_DETAIL(x) #x
+#define STRINGIZE(x) STRINGIZE_DETAIL(x)
+
 
 extern const uint32_t _binary__build_obj_payload_descriptor_bin_start;
 extern const uint32_t _binary__build_obj_payload_descriptor_bin_end;
@@ -36,6 +36,27 @@ typedef struct {
 	unsigned char* app_start;
 } PayloadDescriptor_t;
 
+
+static void printbyte(uint8_t val) {
+  uint8_t buffer[] = "11";\
+  uint8_t upper = (val >> 4) & 0xf;
+  uint8_t lower = (val >> 0) & 0xf;
+
+  buffer[0] = (upper > 9) ? (upper-10 + 'A') ? (upper + '0');
+  buffer[1] = (upper > 9) ? (upper-10 + 'A') ? (upper + '0');
+
+  nrf_drv_uart_tx(buffer, sizeof(buffer)-1);
+}
+
+static void printhex(uint32_t val) {
+  const buffer[] = "0x";
+  nrf_drv_uart_tx(buffer, sizeof(buffer)-1);
+  
+  printbyte((val >> 24) & 0xff);
+  printbyte((val >> 16) & 0xff);
+  printbyte((val >>  8) & 0xff);
+  printbyte((val >>  0) & 0xff);
+}
 
 //static volatile uint32_t sMegaDFUActivate = 0;
 
@@ -71,7 +92,7 @@ int main(void) {
 
 		// nrf_drv_wdt_init(NULL, on_wdt_timeout);
 		nrf_wdt_behaviour_set(NRF_WDT_BEHAVIOUR_RUN_SLEEP);
-		nrf_wdt_reload_value_set((20000 * 32768) / 1000);
+		nrf_wdt_reload_value_set((100000 * 32768) / 1000);
 
 		NVIC_SetPriority(WDT_IRQn, APP_IRQ_PRIORITY_HIGH);
 		NVIC_ClearPendingIRQ(WDT_IRQn);
@@ -91,8 +112,11 @@ int main(void) {
 
 	nrf_drv_uart_config_t uart_config = NRF_DRV_UART_DEFAULT_CONFIG;
 	nrf_drv_uart_init(&uart_config, NULL);
-	const uint8_t data[] = "Hi!\r\n";
-	nrf_drv_uart_tx(data, sizeof(data)-1);
+	{
+	  const uint8_t data[] = STRINGIZE(__LINE__);
+	  nrf_drv_uart_tx(data, sizeof(data)-1);
+	}
+	printhex(0xDEADBEEF);
 	
 	PayloadDescriptor_t* pPayloadDescriptor = (PayloadDescriptor_t*)&_binary__build_obj_payload_descriptor_bin_start;
 
@@ -126,14 +150,12 @@ int main(void) {
 	prx_nvmc_write_word((uint32_t)&(NRF_UICR->CUSTOMER[31]), (uint32_t)&_binary__build_obj_payload_settings_lz4_end);
 	// prx_nvmc_write_word((uint32_t)&(NRF_UICR->CUSTOMER[30]), (uint32_t)&_binary__build_obj_payload_application_lz4_start);
 	// prx_nvmc_write_word((uint32_t)&(NRF_UICR->CUSTOMER[31]), (uint32_t)&_binary__build_obj_payload_application_lz4_end);
-#if 0
-	while(1) {
-            nrf_gpio_pin_set(GPIO_OUTPUT_PIN_NUMBER);
-            for (unsigned ix=0;ix<0x1000;ix++);
-            nrf_gpio_pin_clear(GPIO_OUTPUT_PIN_NUMBER);
-            for (unsigned ix=0;ix<0x1000;ix++);
-        }
-#endif
+
+	{
+	  const uint8_t data[] = STRINGIZE(__LINE__);
+	  nrf_drv_uart_tx(data, sizeof(data)-1);
+	}
+
 	// Jump to the finalize application
 	bootloader_util_app_start((uint32_t)pPayloadDescriptor->finalize_start);
 
