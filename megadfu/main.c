@@ -43,7 +43,7 @@ static void printbyte(uint8_t val) {
   uint8_t lower = (val >> 0) & 0xf;
 
   buffer[0] = (upper > 9) ? (upper-10 + 'A') : (upper + '0');
-  buffer[1] = (upper > 9) ? (upper-10 + 'A') : (upper + '0');
+  buffer[1] = (lower > 9) ? (lower-10 + 'A') : (lower + '0');
 
   nrf_drv_uart_tx(buffer, sizeof(buffer)-1);
 }
