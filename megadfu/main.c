@@ -118,6 +118,7 @@ int main(void) {
 	  const uint8_t data[] = STRINGIZE(__LINE__) "\r\n";
 	  nrf_drv_uart_tx(data, sizeof(data)-1);
 	}
+	printhex(0x12345678);
 	printhex(0xDEADBEEF);
 	PayloadDescriptor_t* pPayloadDescriptor = (PayloadDescriptor_t*)&_binary__build_obj_payload_descriptor_bin_start;
 
@@ -129,6 +130,9 @@ int main(void) {
 	unsigned char* pFinalizeEnd = (unsigned char*)&_binary__build_obj_payload_finalize_bin_end;
 	unsigned int finalizeSize = (uint32_t)(pFinalizeEnd - pFinalizeStart);
 	prx_nvmc_write_words((uint32_t)pPayloadDescriptor->finalize_start, (uint32_t*)pFinalizeStart, finalizeSize / sizeof(uint32_t));
+	printhex((uint32_t)pPayloadDescriptor->finalize_start);
+	printhex((uint32_t) pFinalizeStart);
+	printhex(finalizeSize);
 	
 	// Erase the UICR so that we can be sure that storing the payload addresses in UICR->Customer is safe
 	// NOTE: This will obliterate the NRFFW[0], NRFFW[1], PSELRESET[0], PSELRESET[1], APPROTECT, and NFCPINS values
