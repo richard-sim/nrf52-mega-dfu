@@ -36,7 +36,6 @@ typedef struct {
 	unsigned char* app_start;
 } PayloadDescriptor_t;
 
-#if 0
 static void printbyte(uint8_t val) {
   uint8_t buffer[] = "11";
   uint8_t upper = (val >> 4) & 0xf;
@@ -49,15 +48,18 @@ static void printbyte(uint8_t val) {
 }
 
 static void printhex(uint32_t val) {
-  const uint8_t buffer[] = "0x";
-  nrf_drv_uart_tx(buffer, sizeof(buffer)-1);
+  const uint8_t buffer1[] = "0x";
+  nrf_drv_uart_tx(buffer1, sizeof(buffer)-1);
   
   printbyte((val >> 24) & 0xff);
   printbyte((val >> 16) & 0xff);
   printbyte((val >>  8) & 0xff);
   printbyte((val >>  0) & 0xff);
+
+  const uint8_t buffer2[] = "\r\n";
+  nrf_drv_uart_tx(buffer2, sizeof(buffer)-1);
 }
-#endif
+
 //static volatile uint32_t sMegaDFUActivate = 0;
 
 
@@ -113,12 +115,10 @@ int main(void) {
 	nrf_drv_uart_config_t uart_config = NRF_DRV_UART_DEFAULT_CONFIG;
 	nrf_drv_uart_init(&uart_config, NULL);
 	{
-	  const uint8_t data[] = STRINGIZE(__LINE__);
+	  const uint8_t data[] = STRINGIZE(__LINE__) "\r\n";
 	  nrf_drv_uart_tx(data, sizeof(data)-1);
 	}
-#if 0	
 	printhex(0xDEADBEEF);
-#endif	
 	PayloadDescriptor_t* pPayloadDescriptor = (PayloadDescriptor_t*)&_binary__build_obj_payload_descriptor_bin_start;
 
 	// Copy the finalizer application to immediately before the bootloader (pstorage pages?? Needs to be cleaned up by the real application on first-run before pstorage or BLE are initialized!)
@@ -153,7 +153,7 @@ int main(void) {
 	// prx_nvmc_write_word((uint32_t)&(NRF_UICR->CUSTOMER[31]), (uint32_t)&_binary__build_obj_payload_application_lz4_end);
 
 	{
-	  const uint8_t data[] = STRINGIZE(__LINE__);
+	  const uint8_t data[] = STRINGIZE(__LINE__) "\r\n";
 	  nrf_drv_uart_tx(data, sizeof(data)-1);
 	}
 
