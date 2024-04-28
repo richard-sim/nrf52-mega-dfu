@@ -38,18 +38,18 @@ typedef struct {
 
 
 static void printbyte(uint8_t val) {
-  uint8_t buffer[] = "11";\
+  uint8_t buffer[] = "11";
   uint8_t upper = (val >> 4) & 0xf;
   uint8_t lower = (val >> 0) & 0xf;
 
-  buffer[0] = (upper > 9) ? (upper-10 + 'A') ? (upper + '0');
-  buffer[1] = (upper > 9) ? (upper-10 + 'A') ? (upper + '0');
+  buffer[0] = (upper > 9) ? (upper-10 + 'A') : (upper + '0');
+  buffer[1] = (upper > 9) ? (upper-10 + 'A') : (upper + '0');
 
   nrf_drv_uart_tx(buffer, sizeof(buffer)-1);
 }
 
 static void printhex(uint32_t val) {
-  const buffer[] = "0x";
+  const uint8_t buffer[] = "0x";
   nrf_drv_uart_tx(buffer, sizeof(buffer)-1);
   
   printbyte((val >> 24) & 0xff);
@@ -92,7 +92,7 @@ int main(void) {
 
 		// nrf_drv_wdt_init(NULL, on_wdt_timeout);
 		nrf_wdt_behaviour_set(NRF_WDT_BEHAVIOUR_RUN_SLEEP);
-		nrf_wdt_reload_value_set((100000 * 32768) / 1000);
+		nrf_wdt_reload_value_set(0xfffffffe);
 
 		NVIC_SetPriority(WDT_IRQn, APP_IRQ_PRIORITY_HIGH);
 		NVIC_ClearPendingIRQ(WDT_IRQn);
