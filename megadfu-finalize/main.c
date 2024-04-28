@@ -9,6 +9,8 @@
 #include "prx_nvmc.h"
 #include "LZ4.h"
 
+#define STRINGIZE_DETAIL(x) #x
+#define STRINGIZE(x) STRINGIZE_DETAIL(x)
 
 typedef enum
 {
