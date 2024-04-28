@@ -41,6 +41,8 @@ C_SOURCE_FILES  = $(abspath LZ4.c)
 C_SOURCE_FILES += $(abspath prx_nvmc.c)
 C_SOURCE_FILES += $(abspath main.c)
 C_SOURCE_FILES += $(abspath $(NRF_SDK_PATH)/components/toolchain/system_nrf52.c)
+C_SOURCE_FILES += $(abspath $(NRF_SDK_PATH)/components/drivers_nrf/common/nrf_drv_common.c)
+C_SOURCE_FILES += $(abspath $(NRF_SDK_PATH)/components/drivers_nrf/uart/nrf_drv_uart.c)
 
 # Assembly files common to all targets
 ASM_SOURCE_FILES = $(abspath $(NRF_SDK_PATH)/components/toolchain/gcc/gcc_startup_nrf52.s)
@@ -56,6 +58,7 @@ INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/drivers_nrf/hal)
 INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/toolchain/gcc)
 INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/toolchain)
 INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/drivers_nrf/common)
+INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/drivers_nrf/uart)
 
 OBJECT_DIRECTORY = _build/obj
 LISTING_DIRECTORY = _build
