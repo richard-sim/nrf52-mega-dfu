@@ -49,7 +49,7 @@ static void printbyte(uint8_t val) {
 
 static void printhex(uint32_t val) {
   const uint8_t buffer1[] = "0x";
-  nrf_drv_uart_tx(buffer1, sizeof(buffer)-1);
+  nrf_drv_uart_tx(buffer1, sizeof(buffer1)-1);
   
   printbyte((val >> 24) & 0xff);
   printbyte((val >> 16) & 0xff);
@@ -57,7 +57,7 @@ static void printhex(uint32_t val) {
   printbyte((val >>  0) & 0xff);
 
   const uint8_t buffer2[] = "\r\n";
-  nrf_drv_uart_tx(buffer2, sizeof(buffer)-1);
+  nrf_drv_uart_tx(buffer2, sizeof(buffer2)-1);
 }
 
 //static volatile uint32_t sMegaDFUActivate = 0;
