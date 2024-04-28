@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include "nrf.h"
 
+#include "nrf_drv_uart.h"
+
 #include "prx_nvmc.h"
 #include "LZ4.h"
 
@@ -226,6 +228,10 @@ int main(void) {
 //	while (sFinalizeActivate == 0) {
 //		// Wait
 //	}
+        {
+	  const uint8_t data[] = STRINGIZE(__LINE__) "\r\n";
+	  nrf_drv_uart_tx(data, sizeof(data)-1);
+	}
 
 	uint32_t payload_descriptor_bin_start	= NRF_UICR->CUSTOMER[24];
 	//uint32_t payload_descriptor_bin_end		= NRF_UICR->CUSTOMER[25];
