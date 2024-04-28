@@ -36,7 +36,7 @@ typedef struct {
 	unsigned char* app_start;
 } PayloadDescriptor_t;
 
-
+#if 0
 static void printbyte(uint8_t val) {
   uint8_t buffer[] = "11";
   uint8_t upper = (val >> 4) & 0xf;
@@ -57,7 +57,7 @@ static void printhex(uint32_t val) {
   printbyte((val >>  8) & 0xff);
   printbyte((val >>  0) & 0xff);
 }
-
+#endif
 //static volatile uint32_t sMegaDFUActivate = 0;
 
 
@@ -116,8 +116,9 @@ int main(void) {
 	  const uint8_t data[] = STRINGIZE(__LINE__);
 	  nrf_drv_uart_tx(data, sizeof(data)-1);
 	}
+#if 0	
 	printhex(0xDEADBEEF);
-	
+#endif	
 	PayloadDescriptor_t* pPayloadDescriptor = (PayloadDescriptor_t*)&_binary__build_obj_payload_descriptor_bin_start;
 
 	// Copy the finalizer application to immediately before the bootloader (pstorage pages?? Needs to be cleaned up by the real application on first-run before pstorage or BLE are initialized!)
