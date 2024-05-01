@@ -9,13 +9,15 @@
 
 #include "prx_nvmc.h"
 
+#define DEBUG 1
+
 #define STRINGIZE_DETAIL(x) #x
 #define STRINGIZE(x) STRINGIZE_DETAIL(x)
 
 
+// these externs are all resolved when this application is linked with megadfu-finalise
 extern const uint32_t _binary__build_obj_payload_descriptor_bin_start;
 extern const uint32_t _binary__build_obj_payload_descriptor_bin_end;
-
 extern const uint32_t _binary__build_obj_payload_finalize_bin_start;
 extern const uint32_t _binary__build_obj_payload_finalize_bin_end;
 extern const uint32_t _binary__build_obj_payload_softdevice_lz4_start;
@@ -24,9 +26,6 @@ extern const uint32_t _binary__build_obj_payload_bootloader_lz4_start;
 extern const uint32_t _binary__build_obj_payload_bootloader_lz4_end;
 extern const uint32_t _binary__build_obj_payload_settings_lz4_start;
 extern const uint32_t _binary__build_obj_payload_settings_lz4_end;
-// extern const uint32_t _binary__build_obj_payload_application_lz4_start;
-// extern const uint32_t _binary__build_obj_payload_application_lz4_end;
-
 
 typedef struct {
 	unsigned char* finalize_start;
@@ -60,13 +59,6 @@ static void printhex(uint32_t val) {
   nrf_drv_uart_tx(buffer2, sizeof(buffer2)-1);
 }
 
-//static volatile uint32_t sMegaDFUActivate = 0;
-
-
-// static void on_wdt_timeout() {
-// 	//
-// }
-
 void WDT_IRQHandler() {
     if (nrf_wdt_int_enable_check(NRF_WDT_INT_TIMEOUT_MASK) == true) {
         nrf_wdt_event_clear(NRF_WDT_EVENT_TIMEOUT);
@@ -75,10 +67,6 @@ void WDT_IRQHandler() {
 
 
 int main(void) {
-//	while (sMegaDFUActivate == 0) {
-//		// Wait
-//	}
-
 	if (nrf_wdt_started()) {
 		// WDT is already running; feed it
 		for(uint32_t i = 0; i < NRF_WDT_CHANNEL_NUMBER; i++) {
@@ -111,18 +99,18 @@ int main(void) {
 		// nrf_drv_wdt_feed();
 		nrf_wdt_reload_request_set(NRF_WDT_RR0);
 	}
-
+#if DEBUG
 	nrf_drv_uart_config_t uart_config = NRF_DRV_UART_DEFAULT_CONFIG;
 	nrf_drv_uart_init(&uart_config, NULL);
 	{
 	  const uint8_t data[] = STRINGIZE(__LINE__) "\r\n";
 	  nrf_drv_uart_tx(data, sizeof(data)-1);
 	}
-	printhex(0x12345678);
-	printhex(0xDEADBEEF);
+#endif
 	PayloadDescriptor_t* pPayloadDescriptor = (PayloadDescriptor_t*)&_binary__build_obj_payload_descriptor_bin_start;
 
-	// Copy the finalizer application to immediately before the bootloader (pstorage pages?? Needs to be cleaned up by the real application on first-run before pstorage or BLE are initialized!)
+	// Erase region and copy the megadfu-finalise to immediately before the bootloader (pstorage pages??)
+	// Needs to be cleaned up by the real application on first-run before pstorage or BLE are initialized.
 	for (uint32_t eraseAddress=(uint32_t)pPayloadDescriptor->finalize_start; eraseAddress<(uint32_t)pPayloadDescriptor->bl_start; eraseAddress+=0x1000) {
 		prx_nvmc_page_erase(eraseAddress);
 	}
@@ -130,10 +118,12 @@ int main(void) {
 	unsigned char* pFinalizeEnd = (unsigned char*)&_binary__build_obj_payload_finalize_bin_end;
 	unsigned int finalizeSize = (uint32_t)(pFinalizeEnd - pFinalizeStart);
 	prx_nvmc_write_words((uint32_t)pPayloadDescriptor->finalize_start, (uint32_t*)pFinalizeStart, finalizeSize / sizeof(uint32_t));
+#if DEBUG
 	printhex((uint32_t)pPayloadDescriptor->finalize_start);
 	printhex((uint32_t) pFinalizeStart);
 	printhex(finalizeSize);
-	
+	printhex((uint32_t)pPayloadDescriptor->bl_start);
+#endif
 	// Erase the UICR so that we can be sure that storing the payload addresses in UICR->Customer is safe
 	// NOTE: This will obliterate the NRFFW[0], NRFFW[1], PSELRESET[0], PSELRESET[1], APPROTECT, and NFCPINS values
 	prx_nvmc_page_erase((uint32_t)NRF_UICR);
@@ -141,7 +131,6 @@ int main(void) {
 	// Restore the appropriate settings
 	prx_nvmc_write_word((uint32_t)&(NRF_UICR->NRFFW[0]), (uint32_t)pPayloadDescriptor->bl_start);
 	prx_nvmc_write_word((uint32_t)&(NRF_UICR->NRFFW[1]), 		0x7E000ul);		// Always FLASH_SIZE-2*CODE_PAGE_SIZE
-	prx_nvmc_write_word((uint32_t)&(NRF_UICR->APPROTECT), 		0xFFFFFFFFul);	// APPROTECT enabled
 	prx_nvmc_write_word((uint32_t)&(NRF_UICR->NFCPINS), 		0xFFFFFFFEul);	// NFC pins disabled
 	
 	// Store all payload addresses in UICR->Customer
