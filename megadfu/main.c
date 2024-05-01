@@ -117,20 +117,21 @@ int main(void) {
 	unsigned char* pFinalizeStart = (unsigned char*)&_binary__build_obj_payload_finalize_bin_start;
 	unsigned char* pFinalizeEnd = (unsigned char*)&_binary__build_obj_payload_finalize_bin_end;
 	unsigned int finalizeSize = (uint32_t)(pFinalizeEnd - pFinalizeStart);
+
 	prx_nvmc_write_words((uint32_t)pPayloadDescriptor->finalize_start, (uint32_t*)pFinalizeStart, finalizeSize / sizeof(uint32_t));
 #if DEBUG
-	printhex((uint32_t)pPayloadDescriptor->finalize_start);
-	printhex((uint32_t) pFinalizeStart);
-	printhex(finalizeSize);
-	printhex((uint32_t)pPayloadDescriptor->bl_start);
+	printhex((uint32_t)pPayloadDescriptor->finalize_start); // 0x00075000
+	printhex((uint32_t) pFinalizeStart);                    // 0x0002713C (will vary based on code size)
+	printhex(finalizeSize);                                 // 0x00001004 (will vary based on code size)
+	printhex((uint32_t)pPayloadDescriptor->bl_start);       // 0x00076000
 #endif
 	// Erase the UICR so that we can be sure that storing the payload addresses in UICR->Customer is safe
-	// NOTE: This will obliterate the NRFFW[0], NRFFW[1], PSELRESET[0], PSELRESET[1], APPROTECT, and NFCPINS values
+	// NOTE: This will obliterate the NRFFW[0], NRFFW[1], PSELRESET[0], PSELRESET[1], and NFCPINS values
 	prx_nvmc_page_erase((uint32_t)NRF_UICR);
 
 	// Restore the appropriate settings
 	prx_nvmc_write_word((uint32_t)&(NRF_UICR->NRFFW[0]), (uint32_t)pPayloadDescriptor->bl_start);
-	prx_nvmc_write_word((uint32_t)&(NRF_UICR->NRFFW[1]), 		0x7E000ul);		// Always FLASH_SIZE-2*CODE_PAGE_SIZE
+	prx_nvmc_write_word((uint32_t)&(NRF_UICR->NRFFW[1]), 		0x7E000ul);	// Always FLASH_SIZE-2*CODE_PAGE_SIZE
 	prx_nvmc_write_word((uint32_t)&(NRF_UICR->NFCPINS), 		0xFFFFFFFEul);	// NFC pins disabled
 	
 	// Store all payload addresses in UICR->Customer
@@ -142,8 +143,6 @@ int main(void) {
 	prx_nvmc_write_word((uint32_t)&(NRF_UICR->CUSTOMER[29]), (uint32_t)&_binary__build_obj_payload_bootloader_lz4_end);
 	prx_nvmc_write_word((uint32_t)&(NRF_UICR->CUSTOMER[30]), (uint32_t)&_binary__build_obj_payload_settings_lz4_start);
 	prx_nvmc_write_word((uint32_t)&(NRF_UICR->CUSTOMER[31]), (uint32_t)&_binary__build_obj_payload_settings_lz4_end);
-	// prx_nvmc_write_word((uint32_t)&(NRF_UICR->CUSTOMER[30]), (uint32_t)&_binary__build_obj_payload_application_lz4_start);
-	// prx_nvmc_write_word((uint32_t)&(NRF_UICR->CUSTOMER[31]), (uint32_t)&_binary__build_obj_payload_application_lz4_end);
 
 	{
 	  const uint8_t data[] = STRINGIZE(__LINE__) "\r\n";

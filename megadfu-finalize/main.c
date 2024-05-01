@@ -28,35 +28,6 @@ typedef struct
 	unsigned char write_buf_size;
 } StreamContext_t;
 
-// static uint32_t sLastAddress = ~0ul;
-// static void stream_eraser_writer(void* ctx, unsigned char val)
-// {
-// 	StreamContext_t* p_stream_context = (StreamContext_t*)ctx;
-
-// 	if (p_stream_context->write_buf_size < sizeof(p_stream_context->write_buf))
-// 	{
-// 		p_stream_context->write_buf[p_stream_context->write_buf_size++] = val;
-// 		return;
-// 	}
-
-// 	unsigned char* pWB = p_stream_context->write_buf;
-// 	uint32_t word_val = (val << 24) | (pWB[2] << 16) | (pWB[1] << 8) | pWB[0];
-
-// 	uint32_t lastPage = sLastAddress / 0x1000;
-// 	uint32_t currPage = (uint32_t)p_stream_context->pCurr / 0x1000;
-// 	if (currPage != lastPage) {
-// 		// Page boundary; erase the new page before we try to write to it
-// 		prx_nvmc_page_erase((uint32_t)p_stream_context->pCurr & ~(0x1000-1));
-// 	}
-
-// 	prx_nvmc_write_word((uint32_t)p_stream_context->pCurr, word_val);
-	
-// 	sLastAddress = (uint32_t)p_stream_context->pCurr;
-// 	p_stream_context->pCurr++;
-
-// 	p_stream_context->write_buf_size = 0;
-// }
-
 static void stream_writer(void* ctx, unsigned char val)
 {
 	StreamContext_t* p_stream_context = (StreamContext_t*)ctx;
@@ -211,17 +182,6 @@ void __attribute__ ((noinline)) perform_finalize(PayloadDescriptor_t payloadDesc
 	for (uint32_t eraseAddress=(uint32_t)payloadDescriptor.app_start; eraseAddress<(uint32_t)payloadDescriptor.finalize_start; eraseAddress+=0x1000) {
 		prx_nvmc_page_erase(eraseAddress);
 	}
-	// unsigned char* pAppCompressedStart = (unsigned char*)payload_application_lz4_start;
-	// unsigned char* pAppCompressedEnd = (unsigned char*)payload_application_lz4_end;
-	// unsigned int appCompressedSize = (uint32_t)(pAppCompressedEnd - pAppCompressedStart);
-	// unsigned int appSize = 0;
-	// sLastAddress = ~0ul;
-	// stream_result = stream_decompress(
-	// 	stream_eraser_writer, stream_reader,
-	// 	pAppCompressedStart, appCompressedSize, 
-	// 	payloadDescriptor.app_start, &appSize);
-	// if (stream_result != STREAM_OK) {
-	// }
 }
 
 //static volatile uint32_t sFinalizeActivate = 0;
@@ -230,11 +190,12 @@ int main(void) {
 //	while (sFinalizeActivate == 0) {
 //		// Wait
 //	}
+#if 0  
         {
 	  const uint8_t data[] = STRINGIZE(__LINE__) "\r\n";
 	  nrf_drv_uart_tx(data, sizeof(data)-1);
 	}
-
+#endif
 	uint32_t payload_descriptor_bin_start	= NRF_UICR->CUSTOMER[24];
 	//uint32_t payload_descriptor_bin_end		= NRF_UICR->CUSTOMER[25];
 	//
