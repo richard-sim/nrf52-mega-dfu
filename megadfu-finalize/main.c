@@ -184,31 +184,28 @@ void __attribute__ ((noinline)) perform_finalize(PayloadDescriptor_t payloadDesc
 	}
 }
 
-//static volatile uint32_t sFinalizeActivate = 0;
+//
+// BEWARE.  There is only 4k of flash allocated for this application.  It's easy to exceed that when adding debug code.  Default size is 0x00000EFC
+//
 
 int main(void) {
-//	while (sFinalizeActivate == 0) {
-//		// Wait
-//	}
-#if 0  
-        {
+
+  while(1)
+  	{
 	  const uint8_t data[] = STRINGIZE(__LINE__) "\r\n";
 	  nrf_drv_uart_tx(data, sizeof(data)-1);
 	}
-#endif
+#if 0
 	uint32_t payload_descriptor_bin_start	= NRF_UICR->CUSTOMER[24];
-	//uint32_t payload_descriptor_bin_end		= NRF_UICR->CUSTOMER[25];
-	//
+
 	PayloadDescriptor_t* pPayloadDescriptor = (PayloadDescriptor_t*)payload_descriptor_bin_start;
 	perform_finalize(*pPayloadDescriptor);
 	
-	// DONE!
-	//NVIC_SystemReset();
 	// Wait for WDT, as it will be running with the OEM bootloader's configuration
 	// and the only way to stop/clear it is to reset due to WDT.
 	while (1) {
 		// Do nothing
 	}
-
+#endif
 	return 0;
 }

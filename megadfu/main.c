@@ -122,7 +122,7 @@ int main(void) {
 #if DEBUG
 	printhex((uint32_t)pPayloadDescriptor->finalize_start); // 0x00075000
 	printhex((uint32_t) pFinalizeStart);                    // 0x0002713C (will vary based on code size)
-	printhex(finalizeSize);                                 // 0x00001004 (will vary based on code size)
+	printhex(finalizeSize);                                 // 0x00000EFC (will vary based on code size)
 	printhex((uint32_t)pPayloadDescriptor->bl_start);       // 0x00076000
 #endif
 	// Erase the UICR so that we can be sure that storing the payload addresses in UICR->Customer is safe
