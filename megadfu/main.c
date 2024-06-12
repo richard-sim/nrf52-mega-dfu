@@ -27,6 +27,38 @@ extern const uint32_t _binary__build_obj_payload_bootloader_lz4_end;
 extern const uint32_t _binary__build_obj_payload_settings_lz4_start;
 extern const uint32_t _binary__build_obj_payload_settings_lz4_end;
 
+static void trace_init(void) {
+  const unsigned cspeed = 1;
+  const unsigned drive  = 3;
+
+  const uint32_t NRF_P0_PIN_CNF = 0x50000700;
+  const uint32_t NRF_CLOCK      = 0x40000000;
+  const uint32_t ITMBASE        = 0xE0000000;
+  const uint32_t ETMBASE        = 0xE0041000;
+  const uint32_t TPIUBASE       = 0xE0040000;
+
+  CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+  NRF_CLOCK->TRACECONFIG |= CLOCK_TRACECONFIG_TRACEMUX_Parallel << CLOCK_TRACECONFIG_TRACEMUX_Pos;
+
+  NRF_P0->PIN_CNF[14] = (GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos) | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos) | (GPIO_PIN_CNF_DIR_Output << GPIO_PIN_CNF_DIR_Pos);
+  NRF_P0->PIN_CNF[15] = (GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos) | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos) | (GPIO_PIN_CNF_DIR_Output << GPIO_PIN_CNF_DIR_Pos);
+  NRF_P0->PIN_CNF[16] = (GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos) | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos) | (GPIO_PIN_CNF_DIR_Output << GPIO_PIN_CNF_DIR_Pos);
+  NRF_P0->PIN_CNF[18] = (GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos) | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos) | (GPIO_PIN_CNF_DIR_Output << GPIO_PIN_CNF_DIR_Pos);
+  NRF_P0->PIN_CNF[20] = (GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos) | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos) | (GPIO_PIN_CNF_DIR_Output << GPIO_PIN_CNF_DIR_Pos);
+
+  *((uint32_t *) (ITMBASE + 0xfb0))  = 0xc5acce55;
+  *((uint32_t *) (ETMBASE + 0xfb0))  = 0xc5acce55;
+  *((uint32_t *) (TPIUBASE + 0xfb0)) = 0xc5acce55;
+
+  // Set port size (TPIU_CSPSR)
+  *((uint32_t *) (TPIUBASE + 4)) = 8; // 4 bits
+
+  // Set pin protocol to Sync Trace Port (TPIU_SPPR)
+  *((uint32_t*) (TPIUBASE+0xF0)) = 0;
+
+  *((uint32_t*) (TPIUBASE+0x304)) = 0x102;
+}
+
 typedef struct {
 	unsigned char* finalize_start;
 	unsigned char* sd_start;
@@ -99,6 +131,7 @@ int main(void) {
 		// nrf_drv_wdt_feed();
 		nrf_wdt_reload_request_set(NRF_WDT_RR0);
 	}
+	trace_init();
 #if DEBUG
 	nrf_drv_uart_config_t uart_config = NRF_DRV_UART_DEFAULT_CONFIG;
 	nrf_drv_uart_init(&uart_config, NULL);
