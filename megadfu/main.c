@@ -31,8 +31,6 @@ static void trace_init(void) {
   const unsigned cspeed = 1;
   const unsigned drive  = 3;
 
-  const uint32_t NRF_P0_PIN_CNF = 0x50000700;
-  const uint32_t NRF_CLOCK      = 0x40000000;
   const uint32_t ITMBASE        = 0xE0000000;
   const uint32_t ETMBASE        = 0xE0041000;
   const uint32_t TPIUBASE       = 0xE0040000;
