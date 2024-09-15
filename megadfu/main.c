@@ -5,8 +5,6 @@
 #include "nrf_wdt.h"
 #include "bootloader_util.h"
 
-#include "nrf_drv_uart.h"
-
 #include "prx_nvmc.h"
 
 #include <nrf52.h>
@@ -40,30 +38,6 @@ typedef struct {
 	unsigned char* settings_start;
 	unsigned char* app_start;
 } PayloadDescriptor_t;
-
-static void printbyte(uint8_t val) {
-  uint8_t buffer[] = "11";
-  uint8_t upper = (val >> 4) & 0xf;
-  uint8_t lower = (val >> 0) & 0xf;
-
-  buffer[0] = (upper > 9) ? (upper-10 + 'A') : (upper + '0');
-  buffer[1] = (lower > 9) ? (lower-10 + 'A') : (lower + '0');
-
-  nrf_drv_uart_tx(buffer, sizeof(buffer)-1);
-}
-
-static void printhex(uint32_t val) {
-  const uint8_t buffer1[] = "0x";
-  nrf_drv_uart_tx(buffer1, sizeof(buffer1)-1);
-  
-  printbyte((val >> 24) & 0xff);
-  printbyte((val >> 16) & 0xff);
-  printbyte((val >>  8) & 0xff);
-  printbyte((val >>  0) & 0xff);
-
-  const uint8_t buffer2[] = "\r\n";
-  nrf_drv_uart_tx(buffer2, sizeof(buffer2)-1);
-}
 
 void WDT_IRQHandler() {
     if (nrf_wdt_int_enable_check(NRF_WDT_INT_TIMEOUT_MASK) == true) {
@@ -200,14 +174,6 @@ int main(void) {
 		// nrf_drv_wdt_feed();
 		nrf_wdt_reload_request_set(NRF_WDT_RR0);
 	}
-#if DEBUG
-	nrf_drv_uart_config_t uart_config = NRF_DRV_UART_DEFAULT_CONFIG;
-	nrf_drv_uart_init(&uart_config, NULL);
-	{
-	  const uint8_t data[] = STRINGIZE(__LINE__) "\r\n";
-	  nrf_drv_uart_tx(data, sizeof(data)-1);
-	}
-#endif
 	PayloadDescriptor_t* pPayloadDescriptor = (PayloadDescriptor_t*)&_binary__build_obj_payload_descriptor_bin_start;
 
 	// Erase region and copy the megadfu-finalise to immediately before the bootloader (pstorage pages??)
@@ -220,12 +186,6 @@ int main(void) {
 	unsigned int finalizeSize = (uint32_t)(pFinalizeEnd - pFinalizeStart);
 
 	prx_nvmc_write_words((uint32_t)pPayloadDescriptor->finalize_start, (uint32_t*)pFinalizeStart, finalizeSize / sizeof(uint32_t));
-#if DEBUG
-	printhex((uint32_t)pPayloadDescriptor->finalize_start); // 0x00075000
-	printhex((uint32_t) pFinalizeStart);                    // 0x0002713C (will vary based on code size)
-	printhex(finalizeSize);                                 // 0x00000EFC (will vary based on code size)
-	printhex((uint32_t)pPayloadDescriptor->bl_start);       // 0x00076000
-#endif
 	// Erase the UICR so that we can be sure that storing the payload addresses in UICR->Customer is safe
 	// NOTE: This will obliterate the NRFFW[0], NRFFW[1], PSELRESET[0], PSELRESET[1], and NFCPINS values
 	prx_nvmc_page_erase((uint32_t)NRF_UICR);
@@ -244,11 +204,6 @@ int main(void) {
 	prx_nvmc_write_word((uint32_t)&(NRF_UICR->CUSTOMER[29]), (uint32_t)&_binary__build_obj_payload_bootloader_lz4_end);
 	prx_nvmc_write_word((uint32_t)&(NRF_UICR->CUSTOMER[30]), (uint32_t)&_binary__build_obj_payload_settings_lz4_start);
 	prx_nvmc_write_word((uint32_t)&(NRF_UICR->CUSTOMER[31]), (uint32_t)&_binary__build_obj_payload_settings_lz4_end);
-
-	{
-	  const uint8_t data[] = STRINGIZE(__LINE__) "\r\n";
-	  nrf_drv_uart_tx(data, sizeof(data)-1);
-	}
 
 	// Jump to the finalize application
 	bootloader_util_app_start((uint32_t)pPayloadDescriptor->finalize_start);
