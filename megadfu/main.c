@@ -71,11 +71,43 @@ void WDT_IRQHandler() {
     }
 }
 
-static void trace_init(void) {
+void start_etm(void) {
+  const unsigned ETMBASE = 0xE0041000;
+  // Allow access to device
+  *(unsigned*)(ETMBASE+0xfb0) = 0xc5acce55;
+
+  // Enter configuration mode (write twice to be sure we reached it)
+  *(unsigned*)(ETMBASE) = (1<<10);
+  *(unsigned*)(ETMBASE) = (1<<10);
+
+  // Set busID 2
+  *(unsigned*)(ETMBASE+0x200) = 2;
+
+  // Set trigger event
+  *(unsigned*)(ETMBASE+8) = 0x406f;
+
+  // Set to always enable in ETM Trace Enable Event
+  *(unsigned*)(ETMBASE+0x20) = 0x6f;
+
+  // Trace and stall always enabled
+  *(unsigned*)(ETMBASE+0x24) = 0x020000001;
+
+  // Stall when < 8 byes free in fifo
+  *(unsigned*)(ETMBASE+0x2c) = 8;
+
+  // Enable trace
+  *(unsigned*)(ETMBASE) = 0x0800 | (0 << 7) | (0 << 8);
+
+  // Essential that this bit is only cleared after everything else is done
+  *(unsigned*)(ETMBASE) &= ~(1<<10);
+}
+
+void trace_init(void) {
   // enableNRF52TRACE 4 3 3
+
   CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
 
-  NRF_CLOCK->TRACECONFIG |= (CLOCK_TRACECONFIG_TRACEMUX_Parallel << CLOCK_TRACECONFIG_TRACEMUX_Pos) | (CLOCK_TRACECONFIG_TRACEPORTSPEED_4MHz << CLOCK_TRACECONFIG_TRACEPORTSPEED_Pos);
+  NRF_CLOCK->TRACECONFIG |= (CLOCK_TRACECONFIG_TRACEMUX_Parallel << CLOCK_TRACECONFIG_TRACEMUX_Pos) | (CLOCK_TRACECONFIG_TRACEPORTSPEED_32MHz << CLOCK_TRACECONFIG_TRACEPORTSPEED_Pos);
 
   NRF_P0->PIN_CNF[18] = (GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos) | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos) | (GPIO_PIN_CNF_DIR_Output << GPIO_PIN_CNF_DIR_Pos);
   NRF_P0->PIN_CNF[20] = (GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos) | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos) | (GPIO_PIN_CNF_DIR_Output << GPIO_PIN_CNF_DIR_Pos);
@@ -83,9 +115,8 @@ static void trace_init(void) {
   NRF_P0->PIN_CNF[15] = (GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos) | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos) | (GPIO_PIN_CNF_DIR_Output << GPIO_PIN_CNF_DIR_Pos);
   NRF_P0->PIN_CNF[16] = (GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos) | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos) | (GPIO_PIN_CNF_DIR_Output << GPIO_PIN_CNF_DIR_Pos);
 
+  // unload ITM
   ITM->LAR = 0xc5acce55;
-  *(uint32_t*)(TPI_BASE+0x1000+0xfb0) = 0xc5acce55;
-  *(uint32_t*)(TPI_BASE+0xfb0) = 0xc5acce55;
 
   // Set port size (TPIU_CSPSR)
   TPI->CSPSR = 1 << 3;
@@ -94,40 +125,40 @@ static void trace_init(void) {
 
   TPI->FFCR = 0x102;
 
-  ITM->LAR = 0xc5acce55;
-
   ITM->TCR &= ~(0x7f << 16);
   ITM->TCR |= (1 << 16);
 
+  // https://developer.arm.com/documentation/ddi0403/d/Debug-Architecture/ARMv7-M-Debug/The-Data-Watchpoint-and-Trace-unit/Control-register--DWT-CTRL?lang=en
   // dwtSamplePC 1
   DWT->CTRL |= (1 << 12);
 
-  // dwtSyncTap 3
-  DWT->CTRL |= (3 << 10);
+  // dwtSyncTap 1 (was 3)
+  DWT->CTRL &= ~(3 << 10);
+  DWT->CTRL |= (1 << 10);
 
   // dwtPostTap 0
   DWT->CTRL &= ~(1 << 9);
   
-  // dwtPostInit 1
+  // dwtPostInit 0 (was 1)
   CoreDebug->DCRDR |= 0x1000000;
   DWT->CTRL |= ~(0x0f << 5);
-  DWT->CTRL &= ~(1 << 5);
+  //  DWT->CTRL &= ~(1 << 5);
   
-  // dwtPostReset 10
+  // dwtPostReset 0 (was 10)
   DWT->CTRL &= ~(0x0f << 1);
-  DWT->CTRL |= (0x0a << 1);
+  //  DWT->CTRL |= (0x00 << 1);
 
   // dwtCycEna 1
   DWT->CTRL |= (1 << 0);
 
   // ITMTXEna 1
-  ITM->LAR = 0xc5acce55;
   ITM->TCR |= (1 << 3);
 
   // ITMEna 1
   ITM->TCR |= (1 << 0);
-}
 
+  start_etm();
+}
 
 int main(void) {
   trace_init();
