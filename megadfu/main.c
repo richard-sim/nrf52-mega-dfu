@@ -136,12 +136,7 @@ void trace_init(void) {
 
 int main(void) {
   trace_init();
-      ITM_SendString(0, __DATE__);
-      ITM_Send8(0,'\r');
-      ITM_Send8(0,'\n');
-      ITM_SendString(0, __TIME__);
-      ITM_Send8(0,'\r');
-      ITM_Send8(0,'\n');
+      ITM_SendString(0, "\r\n" __DATE__ "\r\n" __TIME__ "\r\n");
 	if (nrf_wdt_started()) {
 		// WDT is already running; feed it
 		for(uint32_t i = 0; i < NRF_WDT_CHANNEL_NUMBER; i++) {
@@ -205,6 +200,10 @@ int main(void) {
 	prx_nvmc_write_word((uint32_t)&(NRF_UICR->CUSTOMER[30]), (uint32_t)&_binary__build_obj_payload_settings_lz4_start);
 	prx_nvmc_write_word((uint32_t)&(NRF_UICR->CUSTOMER[31]), (uint32_t)&_binary__build_obj_payload_settings_lz4_end);
 
+	while(1) {
+	  ITM_SendString(0, "!!!!!!!!!!!!!\r\n");
+	}
+	
 	// Jump to the finalize application
 	bootloader_util_app_start((uint32_t)pPayloadDescriptor->finalize_start);
 
