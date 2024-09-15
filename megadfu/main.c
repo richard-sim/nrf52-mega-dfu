@@ -9,6 +9,12 @@
 
 #include "prx_nvmc.h"
 
+#include <nrf52.h>
+#include <nrf52_bitfields.h>
+
+#include "itm_messages.h"
+
+
 #define DEBUG 1
 
 #define STRINGIZE_DETAIL(x) #x
@@ -26,36 +32,6 @@ extern const uint32_t _binary__build_obj_payload_bootloader_lz4_start;
 extern const uint32_t _binary__build_obj_payload_bootloader_lz4_end;
 extern const uint32_t _binary__build_obj_payload_settings_lz4_start;
 extern const uint32_t _binary__build_obj_payload_settings_lz4_end;
-
-static void trace_init(void) {
-  const unsigned cspeed = 1;
-  const unsigned drive  = 3;
-
-  const uint32_t ITMBASE        = 0xE0000000;
-  const uint32_t ETMBASE        = 0xE0041000;
-  const uint32_t TPIUBASE       = 0xE0040000;
-
-  CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
-  NRF_CLOCK->TRACECONFIG |= CLOCK_TRACECONFIG_TRACEMUX_Parallel << CLOCK_TRACECONFIG_TRACEMUX_Pos;
-
-  NRF_P0->PIN_CNF[14] = (GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos) | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos) | (GPIO_PIN_CNF_DIR_Output << GPIO_PIN_CNF_DIR_Pos);
-  NRF_P0->PIN_CNF[15] = (GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos) | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos) | (GPIO_PIN_CNF_DIR_Output << GPIO_PIN_CNF_DIR_Pos);
-  NRF_P0->PIN_CNF[16] = (GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos) | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos) | (GPIO_PIN_CNF_DIR_Output << GPIO_PIN_CNF_DIR_Pos);
-  NRF_P0->PIN_CNF[18] = (GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos) | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos) | (GPIO_PIN_CNF_DIR_Output << GPIO_PIN_CNF_DIR_Pos);
-  NRF_P0->PIN_CNF[20] = (GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos) | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos) | (GPIO_PIN_CNF_DIR_Output << GPIO_PIN_CNF_DIR_Pos);
-
-  *((uint32_t *) (ITMBASE + 0xfb0))  = 0xc5acce55;
-  *((uint32_t *) (ETMBASE + 0xfb0))  = 0xc5acce55;
-  *((uint32_t *) (TPIUBASE + 0xfb0)) = 0xc5acce55;
-
-  // Set port size (TPIU_CSPSR)
-  *((uint32_t *) (TPIUBASE + 4)) = 8; // 4 bits
-
-  // Set pin protocol to Sync Trace Port (TPIU_SPPR)
-  *((uint32_t*) (TPIUBASE+0xF0)) = 0;
-
-  *((uint32_t*) (TPIUBASE+0x304)) = 0x102;
-}
 
 typedef struct {
 	unsigned char* finalize_start;
@@ -95,8 +71,72 @@ void WDT_IRQHandler() {
     }
 }
 
+static void trace_init(void) {
+  // enableNRF52TRACE 4 3 3
+  CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+
+  NRF_CLOCK->TRACECONFIG |= (CLOCK_TRACECONFIG_TRACEMUX_Parallel << CLOCK_TRACECONFIG_TRACEMUX_Pos) | (CLOCK_TRACECONFIG_TRACEPORTSPEED_4MHz << CLOCK_TRACECONFIG_TRACEPORTSPEED_Pos);
+
+  NRF_P0->PIN_CNF[18] = (GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos) | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos) | (GPIO_PIN_CNF_DIR_Output << GPIO_PIN_CNF_DIR_Pos);
+  NRF_P0->PIN_CNF[20] = (GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos) | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos) | (GPIO_PIN_CNF_DIR_Output << GPIO_PIN_CNF_DIR_Pos);
+  NRF_P0->PIN_CNF[14] = (GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos) | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos) | (GPIO_PIN_CNF_DIR_Output << GPIO_PIN_CNF_DIR_Pos);
+  NRF_P0->PIN_CNF[15] = (GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos) | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos) | (GPIO_PIN_CNF_DIR_Output << GPIO_PIN_CNF_DIR_Pos);
+  NRF_P0->PIN_CNF[16] = (GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos) | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos) | (GPIO_PIN_CNF_DIR_Output << GPIO_PIN_CNF_DIR_Pos);
+
+  ITM->LAR = 0xc5acce55;
+  *(uint32_t*)(TPI_BASE+0x1000+0xfb0) = 0xc5acce55;
+  *(uint32_t*)(TPI_BASE+0xfb0) = 0xc5acce55;
+
+  // Set port size (TPIU_CSPSR)
+  TPI->CSPSR = 1 << 3;
+  // Set pin protocol to Sync Trace Port (TPIU_SPPR)
+  TPI->SPPR = 0;
+
+  TPI->FFCR = 0x102;
+
+  ITM->LAR = 0xc5acce55;
+
+  ITM->TCR &= ~(0x7f << 16);
+  ITM->TCR |= (1 << 16);
+
+  // dwtSamplePC 1
+  DWT->CTRL |= (1 << 12);
+
+  // dwtSyncTap 3
+  DWT->CTRL |= (3 << 10);
+
+  // dwtPostTap 0
+  DWT->CTRL &= ~(1 << 9);
+  
+  // dwtPostInit 1
+  CoreDebug->DCRDR |= 0x1000000;
+  DWT->CTRL |= ~(0x0f << 5);
+  DWT->CTRL &= ~(1 << 5);
+  
+  // dwtPostReset 10
+  DWT->CTRL &= ~(0x0f << 1);
+  DWT->CTRL |= (0x0a << 1);
+
+  // dwtCycEna 1
+  DWT->CTRL |= (1 << 0);
+
+  // ITMTXEna 1
+  ITM->LAR = 0xc5acce55;
+  ITM->TCR |= (1 << 3);
+
+  // ITMEna 1
+  ITM->TCR |= (1 << 0);
+}
+
 
 int main(void) {
+  trace_init();
+      ITM_SendString(0, __DATE__);
+      ITM_Send8(0,'\r');
+      ITM_Send8(0,'\n');
+      ITM_SendString(0, __TIME__);
+      ITM_Send8(0,'\r');
+      ITM_Send8(0,'\n');
 	if (nrf_wdt_started()) {
 		// WDT is already running; feed it
 		for(uint32_t i = 0; i < NRF_WDT_CHANNEL_NUMBER; i++) {
@@ -129,7 +169,6 @@ int main(void) {
 		// nrf_drv_wdt_feed();
 		nrf_wdt_reload_request_set(NRF_WDT_RR0);
 	}
-	trace_init();
 #if DEBUG
 	nrf_drv_uart_config_t uart_config = NRF_DRV_UART_DEFAULT_CONFIG;
 	nrf_drv_uart_init(&uart_config, NULL);
