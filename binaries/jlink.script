@@ -1,0 +1,8 @@
+Device NRF52832_XXAA
+speed 4000
+selectinterface SWD
+connect NRF52832_XXAA S 4000
+erase
+loadfile ID130C_616.hex
+reset
+quit
