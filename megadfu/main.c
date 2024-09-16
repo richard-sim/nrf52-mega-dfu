@@ -106,6 +106,9 @@ void trace_init(void) {
   // dwtSamplePC 1
   DWT->CTRL |= (1 << 12);
 
+  // dwtTraceException 1
+  DWT->CTRL |= (1 << 16);
+  
   // dwtSyncTap 1 (was 3)
   DWT->CTRL &= ~(3 << 10);
   DWT->CTRL |= (1 << 10);
@@ -130,6 +133,8 @@ void trace_init(void) {
 
   // ITMEna 1
   ITM->TCR |= (1 << 0);
+
+
 
   start_etm();
 }
