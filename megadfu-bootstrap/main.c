@@ -7,6 +7,11 @@
 #error MEGADFU_START must be defined!
 #endif
 
+static inline void wait_for_flash_ready(void)
+{
+    while (NRF_NVMC->READY == NVMC_READY_READY_Busy) {;}
+}
+
 static void prx_nvmc_page_erase(uint32_t address)
 {
     // Enable erase.
