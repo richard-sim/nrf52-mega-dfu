@@ -205,6 +205,7 @@ int main(void) {
 	prx_nvmc_write_word((uint32_t)&(NRF_UICR->CUSTOMER[30]), (uint32_t)&_binary__build_obj_payload_settings_lz4_start);
 	prx_nvmc_write_word((uint32_t)&(NRF_UICR->CUSTOMER[31]), (uint32_t)&_binary__build_obj_payload_settings_lz4_end);
 
+  trace_init();
 	while(1) {
 	  ITM_SendString(0, "!!!!!!!!!!!!!\r\n");
 	}
