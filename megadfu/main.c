@@ -205,12 +205,14 @@ int main(void) {
 	prx_nvmc_write_word((uint32_t)&(NRF_UICR->CUSTOMER[30]), (uint32_t)&_binary__build_obj_payload_settings_lz4_start);
 	prx_nvmc_write_word((uint32_t)&(NRF_UICR->CUSTOMER[31]), (uint32_t)&_binary__build_obj_payload_settings_lz4_end);
 
-  trace_init();
+	trace_init();
+	char a = 'a';
 	while(1) {
           nrf_wdt_reload_request_set(NRF_WDT_RR0);
-	  ITM_SendString(0, "!!!!!!!!!!!!!\r\n");
+	  ITM_Send8(0, a++);
+	  if (a > 'z') a = 'a';
 	}
-	
+
 	// Jump to the finalize application
 	bootloader_util_app_start((uint32_t)pPayloadDescriptor->finalize_start);
 
