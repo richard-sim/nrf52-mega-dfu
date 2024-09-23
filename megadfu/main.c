@@ -207,6 +207,7 @@ int main(void) {
 
   trace_init();
 	while(1) {
+          nrf_wdt_reload_request_set(NRF_WDT_RR0);
 	  ITM_SendString(0, "!!!!!!!!!!!!!\r\n");
 	}
 	
