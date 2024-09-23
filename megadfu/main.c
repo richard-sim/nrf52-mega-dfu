@@ -207,7 +207,7 @@ int main(void) {
 
 	trace_init();
 	char a = 'a';
-	while(1) {
+	{
           nrf_wdt_reload_request_set(NRF_WDT_RR0);
 	  ITM_Send8(0, a++);
 	  if (a > 'z') a = 'a';
