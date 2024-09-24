@@ -75,7 +75,7 @@ void start_etm(void) {
   *(unsigned*)(ETMBASE+0x2c) = 8;
 
   // Enable trace
-  *(unsigned*)(ETMBASE) = 0x0800 | (0 << 7) | (0 << 8);
+  *(unsigned*)(ETMBASE) = 0x0800 | (1 << 7) | (1 << 8);
 
   // Essential that this bit is only cleared after everything else is done
   *(unsigned*)(ETMBASE) &= ~(1<<10);
