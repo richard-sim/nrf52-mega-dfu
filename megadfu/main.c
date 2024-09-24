@@ -218,6 +218,9 @@ int main(void) {
 	    nrf_wdt_reload_request_set(reload_reg);
 	  }
 	}
+
+	NRF_POWER->RESETREAS = 0;
+	
 	// Jump to the finalize application
 	bootloader_util_app_start((uint32_t)pPayloadDescriptor->finalize_start);
 
