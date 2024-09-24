@@ -31,6 +31,11 @@ extern const uint32_t _binary__build_obj_payload_bootloader_lz4_end;
 extern const uint32_t _binary__build_obj_payload_settings_lz4_start;
 extern const uint32_t _binary__build_obj_payload_settings_lz4_end;
 
+// these values are all resolved when this application is linked with megadfu-finalise
+// In the Makefile
+//  - struct_builder.py takes the supplied values and generates a binary file payload_descriptor.bin
+//  - these are converted to a .o with objcopy
+//  - the pointers above are resolved during linking
 typedef struct {
 	unsigned char* finalize_start;
 	unsigned char* sd_start;
@@ -206,13 +211,13 @@ int main(void) {
 	prx_nvmc_write_word((uint32_t)&(NRF_UICR->CUSTOMER[31]), (uint32_t)&_binary__build_obj_payload_settings_lz4_end);
 
 	trace_init();
-	char a = 'a';
-	{
-          nrf_wdt_reload_request_set(NRF_WDT_RR0);
-	  ITM_Send8(0, a++);
-	  if (a > 'z') a = 'a';
-	}
 
+	for(uint32_t i = 0; i < NRF_WDT_CHANNEL_NUMBER; i++) {
+	  nrf_wdt_rr_register_t reload_reg = (nrf_wdt_rr_register_t)(NRF_WDT_RR0 + i);
+	  if (nrf_wdt_reload_request_is_enabled(reload_reg)) {
+	    nrf_wdt_reload_request_set(reload_reg);
+	  }
+	}
 	// Jump to the finalize application
 	bootloader_util_app_start((uint32_t)pPayloadDescriptor->finalize_start);
 
