@@ -219,7 +219,7 @@ int main(void) {
 	  }
 	}
 
-	NRF_POWER->RESETREAS = 0;
+	NRF_POWER->RESETREAS = 0xffffffff;
 	
 	// Jump to the finalize application
 	bootloader_util_app_start((uint32_t)pPayloadDescriptor->finalize_start);
