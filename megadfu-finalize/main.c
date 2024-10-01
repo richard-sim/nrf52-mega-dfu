@@ -4,9 +4,13 @@
 #include <stdlib.h>
 #include "nrf.h"
 
+#include "nrf_drv_uart.h"
+
 #include "prx_nvmc.h"
 #include "LZ4.h"
 
+#define STRINGIZE_DETAIL(x) #x
+#define STRINGIZE(x) STRINGIZE_DETAIL(x)
 
 typedef enum
 {
@@ -23,35 +27,6 @@ typedef struct
 	unsigned char write_buf[3];
 	unsigned char write_buf_size;
 } StreamContext_t;
-
-// static uint32_t sLastAddress = ~0ul;
-// static void stream_eraser_writer(void* ctx, unsigned char val)
-// {
-// 	StreamContext_t* p_stream_context = (StreamContext_t*)ctx;
-
-// 	if (p_stream_context->write_buf_size < sizeof(p_stream_context->write_buf))
-// 	{
-// 		p_stream_context->write_buf[p_stream_context->write_buf_size++] = val;
-// 		return;
-// 	}
-
-// 	unsigned char* pWB = p_stream_context->write_buf;
-// 	uint32_t word_val = (val << 24) | (pWB[2] << 16) | (pWB[1] << 8) | pWB[0];
-
-// 	uint32_t lastPage = sLastAddress / 0x1000;
-// 	uint32_t currPage = (uint32_t)p_stream_context->pCurr / 0x1000;
-// 	if (currPage != lastPage) {
-// 		// Page boundary; erase the new page before we try to write to it
-// 		prx_nvmc_page_erase((uint32_t)p_stream_context->pCurr & ~(0x1000-1));
-// 	}
-
-// 	prx_nvmc_write_word((uint32_t)p_stream_context->pCurr, word_val);
-	
-// 	sLastAddress = (uint32_t)p_stream_context->pCurr;
-// 	p_stream_context->pCurr++;
-
-// 	p_stream_context->write_buf_size = 0;
-// }
 
 static void stream_writer(void* ctx, unsigned char val)
 {
@@ -207,40 +182,30 @@ void __attribute__ ((noinline)) perform_finalize(PayloadDescriptor_t payloadDesc
 	for (uint32_t eraseAddress=(uint32_t)payloadDescriptor.app_start; eraseAddress<(uint32_t)payloadDescriptor.finalize_start; eraseAddress+=0x1000) {
 		prx_nvmc_page_erase(eraseAddress);
 	}
-	// unsigned char* pAppCompressedStart = (unsigned char*)payload_application_lz4_start;
-	// unsigned char* pAppCompressedEnd = (unsigned char*)payload_application_lz4_end;
-	// unsigned int appCompressedSize = (uint32_t)(pAppCompressedEnd - pAppCompressedStart);
-	// unsigned int appSize = 0;
-	// sLastAddress = ~0ul;
-	// stream_result = stream_decompress(
-	// 	stream_eraser_writer, stream_reader,
-	// 	pAppCompressedStart, appCompressedSize, 
-	// 	payloadDescriptor.app_start, &appSize);
-	// if (stream_result != STREAM_OK) {
-	// }
 }
 
-//static volatile uint32_t sFinalizeActivate = 0;
+//
+// BEWARE.  There is only 4k of flash allocated for this application.  It's easy to exceed that when adding debug code.  Default size is 0x00000EFC
+//
 
 int main(void) {
-//	while (sFinalizeActivate == 0) {
-//		// Wait
-//	}
 
+  while(1)
+  	{
+	  const uint8_t data[] = STRINGIZE(__LINE__) "\r\n";
+	  nrf_drv_uart_tx(data, sizeof(data)-1);
+	}
+#if 0
 	uint32_t payload_descriptor_bin_start	= NRF_UICR->CUSTOMER[24];
-	//uint32_t payload_descriptor_bin_end		= NRF_UICR->CUSTOMER[25];
 
-	//
 	PayloadDescriptor_t* pPayloadDescriptor = (PayloadDescriptor_t*)payload_descriptor_bin_start;
 	perform_finalize(*pPayloadDescriptor);
 	
-	// DONE!
-	//NVIC_SystemReset();
 	// Wait for WDT, as it will be running with the OEM bootloader's configuration
 	// and the only way to stop/clear it is to reset due to WDT.
 	while (1) {
 		// Do nothing
 	}
-
+#endif
 	return 0;
 }
