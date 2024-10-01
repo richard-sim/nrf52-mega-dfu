@@ -4,13 +4,9 @@
 #include <stdlib.h>
 #include "nrf.h"
 
-#include "nrf_drv_uart.h"
-
 #include "prx_nvmc.h"
 #include "LZ4.h"
 
-#define STRINGIZE_DETAIL(x) #x
-#define STRINGIZE(x) STRINGIZE_DETAIL(x)
 
 typedef enum
 {
@@ -184,18 +180,13 @@ void __attribute__ ((noinline)) perform_finalize(PayloadDescriptor_t payloadDesc
 	}
 }
 
-//
-// BEWARE.  There is only 4k of flash allocated for this application.  It's easy to exceed that when adding debug code.  Default size is 0x00000EFC
-//
+//static volatile uint32_t sFinalizeActivate = 0;
 
 int main(void) {
+//	while (sFinalizeActivate == 0) {
+//		// Wait
+//	}
 
-  while(1)
-  	{
-	  const uint8_t data[] = STRINGIZE(__LINE__) "\r\n";
-	  nrf_drv_uart_tx(data, sizeof(data)-1);
-	}
-#if 0
 	uint32_t payload_descriptor_bin_start	= NRF_UICR->CUSTOMER[24];
 
 	PayloadDescriptor_t* pPayloadDescriptor = (PayloadDescriptor_t*)payload_descriptor_bin_start;
@@ -206,6 +197,6 @@ int main(void) {
 	while (1) {
 		// Do nothing
 	}
-#endif
+
 	return 0;
 }
